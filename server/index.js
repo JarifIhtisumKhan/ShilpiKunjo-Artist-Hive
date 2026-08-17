@@ -305,6 +305,84 @@ app.post('/api/artworks', async (req, res) => {
   }
 });
 
+// Edit / Update Artwork (Owner or Admin only)
+app.put('/api/artworks/:id', async (req, res) => {
+  try {
+    const artId = req.params.id;
+    const { user_id, title, type, description, media_url } = req.body;
+    if (!title || !media_url) {
+      return res.status(400).json({ error: 'Artwork title and image URL are required' });
+    }
+
+    const artwork = await queryOne(`SELECT * FROM Artworks WHERE art_id = ?`, [artId]);
+    if (!artwork) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+
+    // Check permission
+    const user = await queryOne(
+      `SELECT u.user_id, a.admin_id FROM Users u LEFT JOIN Admins a ON u.user_id = a.admin_id WHERE u.user_id = ?`,
+      [user_id]
+    );
+    if (artwork.artist_id !== Number(user_id) && !user?.admin_id) {
+      return res.status(403).json({ error: 'Permission denied: Only the author or an admin can edit this artwork.' });
+    }
+
+    const sanitizedMediaUrl = formatDriveImageUrl(media_url);
+
+    await run(
+      `UPDATE Artworks SET title = ?, type = ?, description = ?, media_url = ? WHERE art_id = ?`,
+      [title, type || 'Digital', description || '', sanitizedMediaUrl, artId]
+    );
+
+    const updated = await queryOne(
+      `SELECT a.art_id, a.artist_id, a.title, a.type, a.description, a.media_url, a.react_count, a.created_at,
+              u.name as artist_name, u.username as artist_username, ar.bio as artist_bio
+       FROM Artworks a
+       JOIN Artists ar ON a.artist_id = ar.artist_id
+       JOIN Users u ON a.artist_id = u.user_id
+       WHERE a.art_id = ?`,
+      [artId]
+    );
+
+    res.json({ success: true, message: 'Artwork updated successfully', artwork: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete Artwork (Owner or Admin only)
+app.delete('/api/artworks/:id', async (req, res) => {
+  try {
+    const artId = req.params.id;
+    const userId = req.query.user_id || req.body?.user_id;
+
+    const artwork = await queryOne(`SELECT * FROM Artworks WHERE art_id = ?`, [artId]);
+    if (!artwork) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+
+    // Check permission
+    const user = await queryOne(
+      `SELECT u.user_id, a.admin_id FROM Users u LEFT JOIN Admins a ON u.user_id = a.admin_id WHERE u.user_id = ?`,
+      [userId]
+    );
+    if (artwork.artist_id !== Number(userId) && !user?.admin_id) {
+      return res.status(403).json({ error: 'Permission denied: Only the author or an admin can delete this artwork.' });
+    }
+
+    // Cascade delete linked entities
+    await run(`DELETE FROM ArtworkReactions WHERE art_id = ?`, [artId]);
+    await run(`DELETE FROM ArtworkComments WHERE art_id = ?`, [artId]);
+    await run(`DELETE FROM ChallengeSubmissions WHERE art_id = ?`, [artId]);
+    await run(`DELETE FROM Artworks WHERE art_id = ?`, [artId]);
+
+    res.json({ success: true, message: 'Artwork deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Like / React to Artwork
 app.post('/api/artworks/:id/react', async (req, res) => {
   try {

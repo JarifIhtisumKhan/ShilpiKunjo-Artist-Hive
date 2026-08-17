@@ -193,12 +193,20 @@ export default function FeedView({ currentUser }) {
         )}
       />
 
-      {/* Artwork Detail Modal (Pure showcase - no pricing, no cross links) */}
+      {/* Artwork Detail Modal (Pure showcase - no pricing, with author edit/delete) */}
       {selectedArtwork && (
         <ArtworkDetailModal
           artwork={selectedArtwork}
           currentUser={currentUser}
           onClose={() => setSelectedArtwork(null)}
+          onArtworkUpdated={(updated) => {
+            setSelectedArtwork(updated);
+            setArtworks(prev => prev.map(a => a.art_id === updated.art_id ? updated : a));
+          }}
+          onArtworkDeleted={(artId) => {
+            setSelectedArtwork(null);
+            setArtworks(prev => prev.filter(a => a.art_id !== artId));
+          }}
           onReactionChange={(artId, reacted) => {
             setArtworks(prev =>
               prev.map(a =>

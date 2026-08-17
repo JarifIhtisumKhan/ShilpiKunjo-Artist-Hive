@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { User, ShieldCheck, Sparkles, Briefcase, Trophy, Image, CheckCircle, Save, Plus, X, Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
+import ArtworkDetailModal from '../feed/ArtworkDetailModal';
 
 export default function DashboardView({ currentUser, onProfileUpdated }) {
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeSubTab, setActiveSubTab] = useState('artworks');
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
 
   // Form editable states
   const [name, setName] = useState('');
@@ -308,10 +310,14 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {profileData?.artworks?.map(art => (
-                    <div key={art.art_id} className="rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 shadow-md group">
+                    <div
+                      key={art.art_id}
+                      onClick={() => setSelectedArtwork(art)}
+                      className="rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 shadow-md group cursor-pointer hover:border-amber-500/50 transition-all"
+                    >
                       <img src={art.media_url} alt={art.title} className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       <div className="p-3">
-                        <h4 className="text-xs font-bold text-white truncate">{art.title}</h4>
+                        <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-400 transition-colors">{art.title}</h4>
                         <div className="flex items-center justify-between mt-1 text-[10px] text-gray-400">
                           <span className="text-amber-400 font-semibold">{art.type}</span>
                           <span>{art.react_count || 0} Likes</span>
@@ -401,6 +407,23 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
         </div>
 
       </div>
+
+      {/* Artwork Detail Modal */}
+      {selectedArtwork && (
+        <ArtworkDetailModal
+          artwork={selectedArtwork}
+          currentUser={currentUser}
+          onClose={() => setSelectedArtwork(null)}
+          onArtworkUpdated={(updated) => {
+            setSelectedArtwork(updated);
+            fetchProfile();
+          }}
+          onArtworkDeleted={() => {
+            setSelectedArtwork(null);
+            fetchProfile();
+          }}
+        />
+      )}
 
     </div>
   );
