@@ -78,41 +78,64 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase tracking-wider">Artwork Title *</label>
+          {/* Floating Input: Title */}
+          <div className="relative group">
             <input
               type="text"
+              id="artwork-title"
               required
-              placeholder="e.g. Baishakhi Carnival Mask"
+              placeholder=" "
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+              className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300"
             />
+            <label
+              htmlFor="artwork-title"
+              className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+            >
+              Artwork Title *
+            </label>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase tracking-wider">Art Form / Medium *</label>
+          {/* Floating Select: Medium */}
+          <div className="relative group">
             <select
+              id="artwork-type"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500"
+              className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300 cursor-pointer"
             >
               <option value="Digital">Digital Painting & Concept Art</option>
               <option value="Hand-drawn">Hand-drawn, Ink & Watercolor</option>
               <option value="Animation">3D Animation & Environment</option>
             </select>
+            <label
+              htmlFor="artwork-type"
+              className="absolute left-4 top-1.5 text-[10px] text-amber-400 font-semibold pointer-events-none origin-[0_0]"
+            >
+              Art Form / Medium *
+            </label>
           </div>
 
+          {/* Floating Input: Image / Media URL */}
           <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase tracking-wider">Image / Media URL *</label>
-            <input
-              type="url"
-              required
-              placeholder="https://images.unsplash.com/..."
-              value={mediaUrl}
-              onChange={(e) => setMediaUrl(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
-            />
+            <div className="relative group">
+              <input
+                type="url"
+                id="artwork-url"
+                required
+                placeholder=" "
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300"
+              />
+              <label
+                htmlFor="artwork-url"
+                className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+              >
+                Image or Media URL *
+              </label>
+            </div>
             
             {/* Sample Image selector */}
             <div className="mt-2 flex items-center gap-1.5 overflow-x-auto pb-1">
@@ -122,7 +145,7 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
                   type="button"
                   key={idx}
                   onClick={() => setMediaUrl(url)}
-                  className="text-[10px] px-2 py-0.5 rounded bg-gray-900 border border-gray-800 hover:border-amber-500/50 text-gray-400 hover:text-amber-300 flex-shrink-0"
+                  className="text-[10px] px-2.5 py-0.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-amber-500/50 text-gray-400 hover:text-amber-300 flex-shrink-0 transition-colors"
                 >
                   Preset {idx + 1}
                 </button>
@@ -130,15 +153,22 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase tracking-wider">Description</label>
+          {/* Floating Textarea: Description */}
+          <div className="relative group">
             <textarea
+              id="artwork-desc"
               rows={3}
-              placeholder="Describe inspiration, cultural motifs, or technical toolset..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-gray-950 border border-gray-800 rounded-xl p-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 resize-none"
+              placeholder=" "
+              className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300 resize-none"
             />
+            <label
+              htmlFor="artwork-desc"
+              className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+            >
+              Description & Inspiration
+            </label>
           </div>
 
           <div className="pt-2 flex justify-end gap-2">
