@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
 import { X, Upload, Sparkles, Image as ImageIcon } from 'lucide-react';
 
+export function formatDriveImageUrl(url) {
+  if (!url) return '';
+  const trimmed = url.trim();
+  const driveMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+  if (driveMatch && driveMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+  }
+  return trimmed;
+}
+
 export default function UploadArtworkModal({ onClose, currentUser, onUploadSuccess }) {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('Digital');
@@ -18,7 +28,8 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!title.trim() || !mediaUrl.trim()) {
+    const finalUrl = formatDriveImageUrl(mediaUrl);
+    if (!title.trim() || !finalUrl.trim()) {
       setError('Please provide artwork title and image URL');
       return;
     }
@@ -35,7 +46,7 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
           title,
           type,
           description,
-          media_url: mediaUrl
+          media_url: finalUrl
         })
       });
 

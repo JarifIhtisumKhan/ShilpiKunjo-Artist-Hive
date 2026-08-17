@@ -267,6 +267,17 @@ app.get('/api/artworks', async (req, res) => {
   }
 });
 
+// Helper to convert Google Drive sharing links to direct image stream URLs
+function formatDriveImageUrl(url) {
+  if (!url) return '';
+  const trimmed = String(url).trim();
+  const driveMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+  if (driveMatch && driveMatch[1]) {
+    return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+  }
+  return trimmed;
+}
+
 // Post new Artwork to Feed
 app.post('/api/artworks', async (req, res) => {
   try {
@@ -274,6 +285,8 @@ app.post('/api/artworks', async (req, res) => {
     if (!artist_id || !title || !media_url) {
       return res.status(400).json({ error: 'Missing required artwork fields' });
     }
+
+    const sanitizedMediaUrl = formatDriveImageUrl(media_url);
 
     // Ensure artist exists
     const artist = await queryOne(`SELECT artist_id FROM Artists WHERE artist_id = ?`, [artist_id]);
@@ -283,7 +296,7 @@ app.post('/api/artworks', async (req, res) => {
 
     const result = await run(
       `INSERT INTO Artworks (artist_id, title, type, description, media_url, react_count) VALUES (?, ?, ?, ?, ?, 0)`,
-      [artist_id, title, type || 'Digital', description || '', media_url]
+      [artist_id, title, type || 'Digital', description || '', sanitizedMediaUrl]
     );
 
     res.status(201).json({ art_id: result.lastID, message: 'Artwork published successfully' });
