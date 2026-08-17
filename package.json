@@ -1,0 +1,29 @@
+{
+  "name": "shilpikunjo-artist-hive",
+  "version": "1.0.0",
+  "description": "ShilpiKunjo (Artist Hive) - Step 1 Login & Homepage Interface",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/index.js",
+    "seed": "node server/seed.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "lucide-react": "^0.475.0",
+    "mysql2": "^3.23.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.7",
+    "@vitejs/plugin-react": "^4.3.4",
+    "tailwindcss": "^4.0.7",
+    "vite": "^6.1.0"
+  }
+}
