@@ -1,30 +1,31 @@
-import { initDb, run, queryAll } from './db.js';
+import { initDb, run, queryAll, isSqlite } from './db.js';
 
 async function seed() {
-  console.log('--- Initializing MariaDB Schema ---');
+  console.log('--- Initializing Database Schema ---');
   await initDb();
 
-  console.log('--- Clearing Existing Records in MariaDB ---');
-  await run('SET FOREIGN_KEY_CHECKS = 0');
-  await run('TRUNCATE TABLE OrderItems');
-  await run('TRUNCATE TABLE Orders');
-  await run('TRUNCATE TABLE MarketplaceProducts');
-  await run('TRUNCATE TABLE Commissions');
-  await run('TRUNCATE TABLE CourseEnrollments');
-  await run('TRUNCATE TABLE CourseContent');
-  await run('TRUNCATE TABLE Courses');
-  await run('TRUNCATE TABLE ChallengeSubmissions');
-  await run('TRUNCATE TABLE Challenges');
-  await run('TRUNCATE TABLE ArtworkReactions');
-  await run('TRUNCATE TABLE ArtworkComments');
-  await run('TRUNCATE TABLE Artworks');
-  await run('TRUNCATE TABLE ArtistExpertise');
-  await run('TRUNCATE TABLE Artists');
-  await run('TRUNCATE TABLE Admins');
-  await run('TRUNCATE TABLE Users');
-  await run('SET FOREIGN_KEY_CHECKS = 1');
+  console.log('--- Clearing Existing Records ---');
+  if (isSqlite()) {
+    await run('PRAGMA foreign_keys = OFF');
+  } else {
+    await run('SET FOREIGN_KEY_CHECKS = 0');
+  }
+  const tables = [
+    'OrderItems', 'Orders', 'MarketplaceProducts', 'Commissions',
+    'CourseEnrollments', 'CourseContent', 'Courses', 'ChallengeSubmissions',
+    'Challenges', 'ArtworkReactions', 'ArtworkComments', 'Artworks',
+    'ArtistExpertise', 'Artists', 'Admins', 'Users'
+  ];
+  for (const t of tables) {
+    await run(`DELETE FROM ${t}`);
+  }
+  if (isSqlite()) {
+    await run('PRAGMA foreign_keys = ON');
+  } else {
+    await run('SET FOREIGN_KEY_CHECKS = 1');
+  }
 
-  console.log('--- Seeding MariaDB with ShilpiKunjo Data ---');
+  console.log('--- Seeding ShilpiKunjo Data ---');
 
   // 1. Users (All emails using domain @sk.com)
   const users = [

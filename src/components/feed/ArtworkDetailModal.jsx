@@ -173,12 +173,12 @@ export default function ArtworkDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#0F1422] border border-gray-800 rounded-3xl overflow-hidden shadow-2xl my-auto flex flex-col lg:flex-row max-h-[90vh]">
+      <div className="relative w-full max-w-5xl bg-[#c6ae82] border border-[#ab946a] rounded-3xl overflow-hidden shadow-2xl my-auto flex flex-col lg:flex-row max-h-[90vh]">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-gray-950/80 hover:bg-gray-800 text-gray-300 transition-colors shadow-lg"
+          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[#b8a074] hover:bg-[#a89064] text-gray-950 transition-colors shadow-lg"
         >
           <X className="w-5 h-5" />
         </button>
@@ -198,7 +198,7 @@ export default function ArtworkDetailModal({
         </div>
 
         {/* Right: Artwork Metadata & MariaDB Discussion Thread / Edit Mode */}
-        <div className="lg:w-2/5 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-gray-800/80 bg-[#0F1422] p-6 overflow-y-auto">
+        <div className="lg:w-2/5 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-[#ab946a] bg-[#c6ae82] p-6 overflow-y-auto">
           
           {isEditing ? (
             /* --- EDIT POST MODE --- */

@@ -1,0 +1,100 @@
+================================================================================
+           SHILPIKUNJO (ARTIST HIVE) - SQL SELECT QUERIES LOGIC
+================================================================================
+
+--------------------------------------------------------------------------------
+1. AUTHENTICATION & LOGIN / SIGNUP / USER PROFILE (DASHBOARD)
+--------------------------------------------------------------------------------
+
+Pulls user credentials, password hash, role flags (is_artist, is_admin), artist bio, portfolio links, and availability status for login validation.
+SELECT u.*, a.admin_id, ar.bio, ar.portfolio_links, ar.availability_status FROM Users u LEFT JOIN Admins a ON u.user_id = a.admin_id LEFT JOIN Artists ar ON u.user_id = ar.artist_id WHERE (u.username = ? OR u.email = ?) -> line no. 31 from index.js
+
+Pulls list of artist expertise tags/skills associated with the logged-in user.
+SELECT expertise FROM ArtistExpertise WHERE artist_id = ? -> line no. 48 from index.js
+
+Checks if a username or email is already registered during user signup.
+SELECT user_id FROM Users WHERE username = ? OR email = ? -> line no. 78 from index.js
+
+Pulls complete user profile details (username, email, name, phone, address, created_at date, admin status, artist bio, portfolio links).
+SELECT u.user_id, u.username, u.email, u.name, u.phone_number, u.address, u.created_at, a.admin_id, ar.bio, ar.portfolio_links, ar.availability_status FROM Users u LEFT JOIN Admins a ON u.user_id = a.admin_id LEFT JOIN Artists ar ON u.user_id = ar.artist_id WHERE u.user_id = ? -> line no. 130 from index.js
+
+Pulls user expertise tags for the profile dashboard.
+SELECT expertise FROM ArtistExpertise WHERE artist_id = ? -> line no. 155 from index.js
+
+Pulls all artworks uploaded by the user for display on their profile dashboard showcase.
+SELECT * FROM Artworks WHERE artist_id = ? ORDER BY created_at DESC -> line no. 156 from index.js
+
+Pulls all freelance commission jobs requested by or assigned to the user, with client and artist names.
+SELECT c.*, uc.name as client_name, uc.username as client_username, ua.name as artist_name, ua.username as artist_username FROM Commissions c JOIN Users uc ON c.client_id = uc.user_id LEFT JOIN Artists a ON c.artist_id = a.artist_id LEFT JOIN Users ua ON a.artist_id = ua.user_id WHERE c.artist_id = ? OR c.client_id = ? ORDER BY c.created_at DESC -> line no. 157 from index.js
+
+Pulls all contest challenge entries submitted by the artist along with challenge titles and artwork info.
+SELECT cs.*, ch.title as challenge_title, a.title as art_title, a.media_url FROM ChallengeSubmissions cs JOIN Challenges ch ON cs.challenge_id = ch.challenge_id JOIN Artworks a ON cs.art_id = a.art_id WHERE cs.artist_id = ? -> line no. 169 from index.js
+
+Checks if an artist profile record exists before updating profile details.
+SELECT artist_id FROM Artists WHERE artist_id = ? -> line no. 207 from index.js
+
+--------------------------------------------------------------------------------
+2. FEED & ARTWORKS (SHOWCASE)
+--------------------------------------------------------------------------------
+
+Pulls all showcase artworks for the main feed, including title, type, description, media URL, react counts, artist name, bio, and comment counts.
+SELECT a.art_id, a.artist_id, a.title, a.type, a.description, a.media_url, a.react_count, a.created_at, u.name as artist_name, u.username as artist_username, ar.bio as artist_bio, (SELECT COUNT(*) FROM ArtworkComments ac WHERE ac.art_id = a.art_id) as comments_count FROM Artworks a JOIN Artists ar ON a.artist_id = ar.artist_id JOIN Users u ON a.artist_id = u.user_id WHERE 1=1 ... ORDER BY a.created_at DESC -> line no. 238 from index.js
+
+Checks if an artist record exists before publishing a new artwork.
+SELECT artist_id FROM Artists WHERE artist_id = ? -> line no. 292 from index.js
+
+Pulls single artwork details to verify author ownership before editing.
+SELECT * FROM Artworks WHERE art_id = ? -> line no. 317 from index.js
+
+Pulls user role details to check edit permission (author or admin).
+SELECT u.user_id, a.admin_id FROM Users u LEFT JOIN Admins a ON u.user_id = a.admin_id WHERE u.user_id = ? -> line no. 323 from index.js
+
+Pulls updated artwork details along with artist info after an edit operation.
+SELECT a.art_id, a.artist_id, a.title, a.type, a.description, a.media_url, a.react_count, a.created_at, u.name as artist_name, u.username as artist_username, ar.bio as artist_bio FROM Artworks a JOIN Artists ar ON a.artist_id = ar.artist_id JOIN Users u ON a.artist_id = u.user_id WHERE a.art_id = ? -> line no. 339 from index.js
+
+Pulls single artwork details to verify author ownership before deletion.
+SELECT * FROM Artworks WHERE art_id = ? -> line no. 360 from index.js
+
+Pulls user role details to check delete permission (author or admin).
+SELECT u.user_id, a.admin_id FROM Users u LEFT JOIN Admins a ON u.user_id = a.admin_id WHERE u.user_id = ? -> line no. 366 from index.js
+
+Checks if a user has already liked/reacted to a specific artwork.
+SELECT * FROM ArtworkReactions WHERE user_id = ? AND art_id = ? -> line no. 392 from index.js
+
+Pulls all user comments for a specific artwork along with commenter names and usernames.
+SELECT ac.comment_id, ac.art_id, ac.user_id, ac.comment_text, ac.created_at, u.name as user_name, u.username FROM ArtworkComments ac JOIN Users u ON ac.user_id = u.user_id WHERE ac.art_id = ? ORDER BY ac.created_at ASC -> line no. 411 from index.js
+
+--------------------------------------------------------------------------------
+3. COURSES & CURRICULUM
+--------------------------------------------------------------------------------
+
+Pulls available course catalog with instructor names, total lesson count, and total student enrollment count.
+SELECT c.*, u.name as instructor_name, u.username as instructor_username, (SELECT COUNT(*) FROM CourseContent cc WHERE cc.course_id = c.course_id) as lesson_count, (SELECT COUNT(*) FROM CourseEnrollments ce WHERE ce.course_id = c.course_id) as student_count FROM Courses c JOIN Artists ar ON c.instructor_id = ar.artist_id JOIN Users u ON c.instructor_id = u.user_id WHERE 1=1 ... ORDER BY c.created_at DESC -> line no. 450 from index.js
+
+Pulls detailed information for a specific course including instructor bio.
+SELECT c.*, u.name as instructor_name, u.username as instructor_username, ar.bio as instructor_bio FROM Courses c JOIN Artists ar ON c.instructor_id = ar.artist_id JOIN Users u ON c.instructor_id = u.user_id WHERE c.course_id = ? -> line no. 480 from index.js
+
+Pulls sequential lesson list and video/reading content for a course.
+SELECT * FROM CourseContent WHERE course_id = ? ORDER BY sequence_order ASC -> line no. 490 from index.js
+
+Checks if a user is already enrolled in a course.
+SELECT * FROM CourseEnrollments WHERE course_id = ? AND user_id = ? -> line no. 507 from index.js
+
+--------------------------------------------------------------------------------
+4. FREELANCE COMMISSIONS & CHALLENGES (CONTESTS)
+--------------------------------------------------------------------------------
+
+Pulls freelance commission job board listings with client and assigned artist details.
+SELECT c.*, u.name as client_name, u.username as client_username, ua.name as artist_name, ua.username as artist_username FROM Commissions c JOIN Users u ON c.client_id = u.user_id LEFT JOIN Artists a ON c.artist_id = a.artist_id LEFT JOIN Users ua ON a.artist_id = ua.user_id WHERE 1=1 ... ORDER BY c.created_at DESC -> line no. 525 from index.js
+
+Pulls list of art contests and challenges with creator names and total submission count.
+SELECT ch.*, u.name as creator_name, (SELECT COUNT(*) FROM ChallengeSubmissions cs WHERE cs.challenge_id = ch.challenge_id) as entry_count FROM Challenges ch JOIN Users u ON ch.creator_id = u.user_id WHERE 1=1 ... ORDER BY (ch.status = 'Active') DESC, ch.deadline ASC -> line no. 603 from index.js
+
+Pulls details for a specific contest challenge.
+SELECT * FROM Challenges WHERE challenge_id = ? -> line no. 627 from index.js
+
+Pulls all submissions entered into a contest challenge, with artwork info, artist details, votes, and ranks.
+SELECT cs.submission_id, cs.challenge_id, cs.art_id, cs.artist_id, cs.vote_count, cs.rank, cs.submitted_at, a.title as artwork_title, a.type as artwork_type, a.description as artwork_desc, a.media_url, u.name as artist_name, u.username as artist_username, ar.bio as artist_bio FROM ChallengeSubmissions cs JOIN Artworks a ON cs.art_id = a.art_id JOIN Artists ar ON cs.artist_id = ar.artist_id JOIN Users u ON cs.artist_id = u.user_id WHERE cs.challenge_id = ? ORDER BY cs.vote_count DESC, cs.submitted_at ASC -> line no. 630 from index.js
+
+Checks if an artwork has already been entered into a specific contest.
+SELECT submission_id FROM ChallengeSubmissions WHERE challenge_id = ? AND art_id = ? -> line no. 655 from index.js

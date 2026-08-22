@@ -111,7 +111,7 @@ export default function ContestsView({ currentUser }) {
         </button>
 
         {/* Contest Header Banner */}
-        <div className="relative rounded-3xl overflow-hidden border border-gray-800 bg-[#0F1422] p-6 sm:p-10 shadow-2xl">
+        <div className="relative rounded-3xl overflow-hidden border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-10 shadow-2xl">
           {selectedChallenge.banner_url && (
             <div className="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style={{ backgroundImage: `url(${selectedChallenge.banner_url})` }}></div>
           )}
@@ -119,34 +119,34 @@ export default function ContestsView({ currentUser }) {
             <div className="flex items-center gap-2.5">
               <span className={`text-[11px] font-extrabold uppercase px-3 py-1 rounded-full ${
                 selectedChallenge.status === 'Active'
-                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                  : 'bg-gray-800 text-gray-400 border border-gray-700'
+                  ? 'bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30'
+                  : 'bg-[#b8a074] text-gray-800 border border-[#9d865c]'
               }`}>
                 {selectedChallenge.status} Contest
               </span>
-              <span className="text-xs text-gray-400 flex items-center gap-1">
+              <span className="text-xs text-gray-700 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
                 Deadline: {new Date(selectedChallenge.deadline).toLocaleDateString()}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black text-gray-950 tracking-tight">
               {selectedChallenge.title}
             </h1>
-            <p className="text-sm text-gray-300 leading-relaxed">
+            <p className="text-sm text-gray-800 leading-relaxed">
               {selectedChallenge.description}
             </p>
 
             <div className="flex items-center gap-4 pt-2">
-              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                <Users className="w-4 h-4 text-amber-400" />
+              <div className="flex items-center gap-1.5 text-xs text-gray-700">
+                <Users className="w-4 h-4 text-[#315812]" />
                 <span>{submissions.length} Submissions entered</span>
               </div>
 
               {selectedChallenge.status === 'Active' && currentUser?.is_artist && (
                 <button
                   onClick={openSubmitModal}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 hover:opacity-95 shadow-lg shadow-amber-500/20 flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 shadow-lg shadow-[#315812]/20 flex items-center gap-1.5"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Submit Artwork Entry</span>
@@ -157,13 +157,13 @@ export default function ContestsView({ currentUser }) {
         </div>
 
         {/* Gallery Submissions Header */}
-        <div className="flex items-center justify-between pt-2 border-b border-gray-800/80 pb-3">
+        <div className="flex items-center justify-between pt-2 border-b border-[#ab946a] pb-3">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-400" />
+            <h2 className="text-xl font-bold text-gray-950 flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-[#315812]" />
               Contest Artwork Submissions
             </h2>
-            <p className="text-xs text-gray-400">Masonry gallery with live community voting and dynamic leaderboard</p>
+            <p className="text-xs text-gray-700">Masonry gallery with live community voting and dynamic leaderboard</p>
           </div>
         </div>
 
@@ -175,7 +175,7 @@ export default function ContestsView({ currentUser }) {
           renderItem={(sub, index) => {
             const rank = index + 1;
             return (
-              <div className="relative rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 group shadow-lg hover:border-amber-500/50 transition-all duration-300">
+              <div className="relative rounded-2xl overflow-hidden bg-[#b8a074] border border-[#9d865c] group shadow-lg hover:border-[#315812] transition-all duration-300">
                 {/* Artwork Image */}
                 <img
                   src={sub.media_url}
@@ -187,7 +187,7 @@ export default function ContestsView({ currentUser }) {
                 {/* Rank Badge */}
                 <div className="absolute top-3 left-3 z-10">
                   {rank === 1 && (
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500 text-gray-950 font-black text-xs shadow-lg">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#aca04d] text-white font-black text-xs shadow-lg">
                       <Medal className="w-3.5 h-3.5" /> #1 Rank
                     </span>
                   )}
@@ -197,29 +197,29 @@ export default function ContestsView({ currentUser }) {
                     </span>
                   )}
                   {rank === 3 && (
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-800 text-amber-100 font-black text-xs shadow-lg">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#315812] text-white font-black text-xs shadow-lg">
                       <Medal className="w-3.5 h-3.5" /> #3 Rank
                     </span>
                   )}
                 </div>
 
                 {/* Overlay Metadata & Vote Button */}
-                <div className="p-3.5 bg-gradient-to-t from-gray-950 via-gray-900/90 to-transparent flex flex-col gap-2">
+                <div className="p-3.5 bg-[#c6ae82] flex flex-col gap-2 border-t border-[#9d865c]">
                   <div>
-                    <h4 className="text-xs font-bold text-white truncate">{sub.artwork_title}</h4>
-                    <p className="text-[11px] text-gray-400">By {sub.artist_name}</p>
+                    <h4 className="text-xs font-bold text-gray-950 truncate">{sub.artwork_title}</h4>
+                    <p className="text-[11px] text-gray-800">By {sub.artist_name}</p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-gray-800/80">
-                    <span className="text-xs font-extrabold text-amber-400 flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5 fill-amber-500" />
+                  <div className="flex items-center justify-between pt-1 border-t border-[#9d865c]">
+                    <span className="text-xs font-extrabold text-[#315812] flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5 fill-[#315812]" />
                       {sub.vote_count} Votes
                     </span>
 
                     {selectedChallenge.status === 'Active' && (
                       <button
                         onClick={(e) => handleVote(e, sub)}
-                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-gray-950 transition-colors border border-amber-500/30"
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#aca04d]/20 text-[#315812] hover:bg-[#aca04d] hover:text-white transition-colors border border-[#315812]/30"
                       >
                         + Vote
                       </button>
@@ -233,27 +233,27 @@ export default function ContestsView({ currentUser }) {
 
         {/* Submit Artwork to Contest Modal */}
         {isSubmitModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-            <div className="w-full max-w-md bg-[#0F1422] border border-gray-800 rounded-3xl p-6 shadow-2xl">
-              <h3 className="text-lg font-bold text-white mb-2">Submit to Contest</h3>
-              <p className="text-xs text-gray-400 mb-4">Select one of your existing published artworks to submit as your official entry.</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+            <div className="w-full max-w-md bg-[#c6ae82] border border-[#ab946a] rounded-3xl p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-gray-950 mb-2">Submit to Contest</h3>
+              <p className="text-xs text-gray-800 mb-4">Select one of your existing published artworks to submit as your official entry.</p>
 
               {submitError && (
-                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 text-xs font-semibold">
                   {submitError}
                 </div>
               )}
 
               {userArtworks.length === 0 ? (
-                <p className="text-xs text-amber-400 italic mb-4">You have not published any artworks yet. Publish an artwork on the Feed first!</p>
+                <p className="text-xs text-[#315812] italic mb-4">You have not published any artworks yet. Publish an artwork on the Feed first!</p>
               ) : (
                 <form onSubmit={handleSubmitEntry} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-300 mb-1.5">Select Artwork</label>
+                    <label className="block text-xs font-bold text-gray-900 mb-1.5">Select Artwork</label>
                     <select
                       value={selectedArtId}
                       onChange={(e) => setSelectedArtId(e.target.value)}
-                      className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500"
+                      className="w-full bg-[#b8a074] border border-[#9d865c] rounded-xl p-2.5 text-xs text-gray-950 focus:border-[#315812]"
                     >
                       {userArtworks.map(art => (
                         <option key={art.art_id} value={art.art_id}>{art.title} ({art.type})</option>
@@ -265,13 +265,13 @@ export default function ContestsView({ currentUser }) {
                     <button
                       type="button"
                       onClick={() => setIsSubmitModalOpen(false)}
-                      className="px-4 py-2 rounded-xl text-xs bg-gray-900 text-gray-400 hover:bg-gray-800"
+                      className="px-4 py-2 rounded-xl text-xs bg-[#b8a074] text-gray-800 hover:bg-[#a89064]"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-gray-950 hover:bg-amber-400"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95"
                     >
                       Confirm Submission
                     </button>
@@ -291,15 +291,15 @@ export default function ContestsView({ currentUser }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-gray-950 via-[#101524] to-gray-950 p-6 sm:p-8 rounded-3xl border border-gray-800/80 shadow-xl">
+      <div className="bg-[#c6ae82] p-6 sm:p-8 rounded-3xl border border-[#ab946a] shadow-xl">
         <div className="flex items-center gap-2 mb-1">
-          <Trophy className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-black uppercase tracking-wider text-amber-400">Creative Arena</span>
+          <Trophy className="w-4 h-4 text-[#315812]" />
+          <span className="text-xs font-black uppercase tracking-wider text-[#315812]">Creative Arena</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
           Art Challenges & Competitions
         </h1>
-        <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-xl">
+        <p className="text-xs sm:text-sm text-gray-800 mt-1 max-w-xl">
           Participate in themed creative competitions, submit your artwork entries, and vote on community leaderboard rankings.
         </p>
       </div>

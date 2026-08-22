@@ -63,27 +63,27 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-      <div className="relative w-full max-w-lg bg-[#0F1422] border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+      <div className="relative w-full max-w-lg bg-[#c6ae82] border border-[#ab946a] rounded-3xl p-6 sm:p-8 shadow-2xl">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-full bg-gray-900 text-gray-400 hover:text-white"
+          className="absolute top-4 right-4 p-2 rounded-full bg-[#b8a074] text-gray-800 hover:text-gray-950"
         >
           <X className="w-4 h-4" />
         </button>
 
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+          <div className="p-2.5 rounded-2xl bg-[#aca04d]/20 border border-[#315812]/30 text-[#315812]">
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">Publish Artwork to Feed</h3>
-            <p className="text-xs text-gray-400">Showcase your visual creation to the Bangladeshi art community</p>
+            <h3 className="text-xl font-bold text-gray-950">Publish Artwork to Feed</h3>
+            <p className="text-xs text-gray-800">Showcase your visual creation to the Bangladeshi art community</p>
           </div>
         </div>
 
         {error && (
-          <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+          <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 text-xs font-semibold">
             {error}
           </div>
         )}
@@ -98,85 +98,61 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
               placeholder=" "
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300"
+              className="peer w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-950 focus:outline-none focus:border-[#315812] focus:ring-1 focus:ring-[#315812]/50 transition-all duration-300"
             />
             <label
               htmlFor="artwork-title"
-              className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+              className="absolute left-4 top-3.5 text-xs text-gray-700 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-[#315812] font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-800"
             >
               Artwork Title *
             </label>
           </div>
 
-          {/* Floating Select: Medium */}
-          <div className="relative group">
-            <select
-              id="artwork-type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300 cursor-pointer"
-            >
-              <option value="Digital">Digital Painting & Concept Art</option>
-              <option value="Hand-drawn">Hand-drawn, Ink & Watercolor</option>
-              <option value="Animation">3D Animation & Environment</option>
-            </select>
-            <label
-              htmlFor="artwork-type"
-              className="absolute left-4 top-1.5 text-[10px] text-amber-400 font-semibold pointer-events-none origin-[0_0]"
-            >
-              Art Form / Medium *
-            </label>
-          </div>
-
-          {/* Floating Input: Image / Media URL */}
-          <div>
-            <div className="relative group">
+          {/* Type Select & Image URL */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl px-3 py-3 text-xs text-gray-950 focus:outline-none focus:border-[#315812]"
+              >
+                <option value="Digital">Digital Art</option>
+                <option value="Hand-drawn">Hand-drawn</option>
+                <option value="Animation">3D / Animation</option>
+              </select>
+            </div>
+            <div className="sm:col-span-2 relative group">
               <input
                 type="url"
-                id="artwork-url"
+                id="media-url"
                 required
                 placeholder=" "
                 value={mediaUrl}
                 onChange={(e) => setMediaUrl(e.target.value)}
-                className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300"
+                className="peer w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-950 focus:outline-none focus:border-[#315812] transition-all"
               />
               <label
-                htmlFor="artwork-url"
-                className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+                htmlFor="media-url"
+                className="absolute left-4 top-3.5 text-xs text-gray-700 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-[#315812] font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-800"
               >
-                Image or Media URL *
+                Media Image URL *
               </label>
-            </div>
-            
-            {/* Sample Image selector */}
-            <div className="mt-2 flex items-center gap-1.5 overflow-x-auto pb-1">
-              <span className="text-[10px] text-gray-500 flex-shrink-0">Presets:</span>
-              {sampleImages.map((url, idx) => (
-                <button
-                  type="button"
-                  key={idx}
-                  onClick={() => setMediaUrl(url)}
-                  className="text-[10px] px-2.5 py-0.5 rounded-lg bg-gray-900 border border-gray-800 hover:border-amber-500/50 text-gray-400 hover:text-amber-300 flex-shrink-0 transition-colors"
-                >
-                  Preset {idx + 1}
-                </button>
-              ))}
             </div>
           </div>
 
-          {/* Floating Textarea: Description */}
+          {/* Floating Input: Description */}
           <div className="relative group">
             <textarea
               id="artwork-desc"
               rows={3}
+              placeholder=" "
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder=" "
-              className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300 resize-none"
+              className="peer w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-950 focus:outline-none focus:border-[#315812] transition-all resize-none"
             />
             <label
               htmlFor="artwork-desc"
-              className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+              className="absolute left-4 top-3.5 text-xs text-gray-700 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-[#315812] font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-800"
             >
               Description & Inspiration
             </label>
@@ -186,14 +162,14 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-gray-900 text-gray-400 hover:bg-gray-800"
+              className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#b8a074] text-gray-800 hover:bg-[#a89064]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 hover:opacity-95 disabled:opacity-50 flex items-center gap-1.5"
+              className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 disabled:opacity-50 flex items-center gap-1.5 shadow-md"
             >
               <Upload className="w-3.5 h-3.5" />
               <span>{loading ? 'Publishing...' : 'Publish to Feed'}</span>

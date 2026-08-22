@@ -11,11 +11,11 @@ function FloatingInput({ id, type = 'text', label, value, onChange, required = t
         value={value}
         onChange={onChange}
         placeholder=" "
-        className="peer w-full bg-gray-950/80 border border-gray-800 rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-100 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/50 transition-all duration-300"
+        className="peer w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl px-4 pt-5 pb-2 text-xs text-gray-950 focus:outline-none focus:border-[#315812] focus:ring-1 focus:ring-[#315812]/50 transition-all duration-300"
       />
       <label
         htmlFor={id}
-        className="absolute left-4 top-3.5 text-xs text-gray-400 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-amber-400 font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-300"
+        className="absolute left-4 top-3.5 text-xs text-gray-700 pointer-events-none transition-all duration-200 ease-out origin-[0_0] peer-focus:-translate-y-2.5 peer-focus:scale-[0.75] peer-focus:text-[#315812] font-medium peer-[:not(:placeholder-shown)]:-translate-y-2.5 peer-[:not(:placeholder-shown)]:scale-[0.75] peer-[:not(:placeholder-shown)]:text-gray-800"
       >
         {label}
       </label>
@@ -99,34 +99,34 @@ export default function LoginModal({ onLoginSuccess }) {
 
   return (
     <div className="min-h-[88vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass-panel rounded-3xl p-8 border border-gray-800/80 shadow-2xl relative overflow-hidden">
+      <div className="w-full max-w-md bg-[#c6ae82] rounded-3xl p-8 border border-[#ab946a] shadow-2xl relative overflow-hidden">
         {/* Glow decorative background */}
-        <div className="absolute -top-12 -right-12 w-56 h-56 bg-amber-500/10 rounded-full blur-3xl -z-10"></div>
+        <div className="absolute -top-12 -right-12 w-56 h-56 bg-[#aca04d]/10 rounded-full blur-3xl -z-10"></div>
 
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-300 p-0.5 shadow-xl shadow-amber-500/20 mx-auto mb-3 hover:scale-105 transition-transform duration-300">
-            <div className="w-full h-full bg-[#0B0F19] rounded-[14px] flex items-center justify-center">
-              <Palette className="w-7 h-7 text-amber-400" />
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#aca04d] via-[#748729] to-[#315812] p-0.5 shadow-xl shadow-[#315812]/20 mx-auto mb-3 hover:scale-105 transition-transform duration-300">
+            <div className="w-full h-full bg-[#F3E3C5] rounded-[14px] flex items-center justify-center">
+              <Palette className="w-7 h-7 text-[#315812]" />
             </div>
           </div>
 
-          <h2 className="text-3xl font-extrabold tracking-tight text-white">
+          <h2 className="text-3xl font-extrabold tracking-tight text-gray-950">
             ShilpiKunjo
           </h2>
         </div>
 
         {/* Form Error Banner */}
         {error && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs text-center font-medium animate-fadeIn">
+          <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 text-xs text-center font-medium animate-fadeIn">
             {error}
           </div>
         )}
 
         {/* Segmented Sliding Tab Control */}
-        <div className="relative flex bg-gray-950 p-1.5 rounded-2xl border border-gray-800 mb-6 text-xs font-semibold">
+        <div className="relative flex bg-[#b8a074] p-1.5 rounded-2xl border border-[#9d865c] mb-6 text-xs font-semibold">
           <div
-            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl transition-all duration-300 ease-out shadow-md ${
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-[#aca04d] to-[#315812] rounded-xl transition-all duration-300 ease-out shadow-md ${
               mode === 'register' ? 'left-[calc(50%+3px)]' : 'left-1.5'
             }`}
           />
@@ -134,7 +134,7 @@ export default function LoginModal({ onLoginSuccess }) {
             type="button"
             onClick={() => setMode('login')}
             className={`relative z-10 flex-1 py-2.5 text-center transition-colors duration-200 font-bold ${
-              mode === 'login' ? 'text-black' : 'text-gray-400 hover:text-white'
+              mode === 'login' ? 'text-white' : 'text-gray-800 hover:text-gray-950'
             }`}
           >
             Sign In
@@ -143,7 +143,7 @@ export default function LoginModal({ onLoginSuccess }) {
             type="button"
             onClick={() => setMode('register')}
             className={`relative z-10 flex-1 py-2.5 text-center transition-colors duration-200 font-bold ${
-              mode === 'register' ? 'text-black' : 'text-gray-400 hover:text-white'
+              mode === 'register' ? 'text-white' : 'text-gray-800 hover:text-gray-950'
             }`}
           >
             Create Account
@@ -171,62 +171,57 @@ export default function LoginModal({ onLoginSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 text-black font-extrabold text-xs rounded-2xl shadow-lg shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3.5 bg-gradient-to-r from-[#aca04d] via-[#748729] to-[#315812] text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-[#315812]/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2"
             >
               {loading ? 'Authenticating...' : 'Sign In'}
               <ArrowRight className="w-4 h-4" />
             </button>
 
             {/* Google-style Demo Fill Credentials */}
-            <div className="pt-5 border-t border-gray-800/80 mt-6">
-              <span className="block text-[11px] text-gray-400 font-medium text-center mb-3">
-                Demo Credentials (Password: <code className="text-amber-400 font-mono font-bold">password123</code>)
-              </span>
-
-              <div className="flex flex-wrap items-center justify-center gap-2">
+            <div className="pt-3 border-t border-[#ab946a] mt-4">
+              <p className="text-[11px] text-gray-800 mb-2 font-medium text-center">
+                Demo Credentials (Password: <code className="text-[#315812] font-mono font-bold">password123</code>)
+              </p>
+              <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => handleFillDemo('jarif', 'password123')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs font-bold text-amber-400 hover:border-amber-500/40 hover:bg-gray-900 transition-all"
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Jarif
                 </button>
-
                 <button
                   type="button"
                   onClick={() => handleFillDemo('fairuz', 'password123')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs font-bold text-amber-400 hover:border-amber-500/40 hover:bg-gray-900 transition-all"
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Fairuz
                 </button>
-
                 <button
                   type="button"
                   onClick={() => handleFillDemo('rudila', 'password123')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs font-bold text-amber-400 hover:border-amber-500/40 hover:bg-gray-900 transition-all"
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Rudila
                 </button>
-
                 <button
                   type="button"
                   onClick={() => handleFillDemo('rubab_sazda', 'password123')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs font-bold text-amber-400 hover:border-amber-500/40 hover:bg-gray-900 transition-all"
+                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Rubab
                 </button>
-
                 <button
                   type="button"
                   onClick={() => handleFillDemo('admin', 'password123')}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-gray-950 border border-gray-800 rounded-xl text-xs font-bold text-red-400 hover:border-red-500/40 hover:bg-gray-900 transition-all"
+                  className="col-span-2 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-rose-800 hover:bg-rose-500/10 transition-all"
                 >
                   <Shield className="w-3.5 h-3.5" />
-                  Admin
+                  Admin (@admin)
                 </button>
               </div>
             </div>
@@ -270,9 +265,9 @@ export default function LoginModal({ onLoginSuccess }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-400 text-black font-extrabold text-xs rounded-2xl shadow-lg shadow-amber-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4"
+              className="w-full py-3.5 bg-gradient-to-r from-[#aca04d] via-[#748729] to-[#315812] text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-[#315812]/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4"
             >
-              {loading ? 'Creating...' : 'Create Account'}
+              {loading ? 'Creating Account...' : 'Create Account'}
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

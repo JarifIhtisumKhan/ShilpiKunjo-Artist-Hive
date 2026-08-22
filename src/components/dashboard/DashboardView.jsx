@@ -103,28 +103,28 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
       
       {/* Top Profile Header */}
-      <div className="rounded-3xl border border-gray-800 bg-gradient-to-r from-gray-950 via-[#101524] to-gray-950 p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-300 p-1 shadow-lg shadow-amber-500/20">
-            <div className="w-full h-full bg-[#0F1422] rounded-[14px] flex items-center justify-center font-black text-2xl text-amber-400">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#aca04d] via-[#748729] to-[#315812] p-1 shadow-lg shadow-[#315812]/20">
+            <div className="w-full h-full bg-[#b8a074] rounded-[14px] flex items-center justify-center font-black text-2xl text-[#315812]">
               {profileData?.name?.charAt(0) || 'A'}
             </div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-white">{profileData?.name}</h1>
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
+              <h1 className="text-2xl font-black text-gray-950">{profileData?.name}</h1>
+              <ShieldCheck className="w-5 h-5 text-[#315812]" />
             </div>
-            <p className="text-xs text-gray-400">@{profileData?.username} • {profileData?.email}</p>
+            <p className="text-xs text-gray-800">@{profileData?.username} • {profileData?.email}</p>
             <div className="flex items-center gap-2 pt-1">
               <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
                 availability === 'Available'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                  ? 'bg-emerald-500/20 text-emerald-800 border border-emerald-500/30'
+                  : 'bg-rose-500/20 text-rose-800 border border-rose-500/30'
               }`}>
                 Commissions: {availability}
               </span>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30">
                 Verified Artist Profile
               </span>
             </div>
@@ -133,23 +133,23 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
 
         {/* Quick Stats Summary */}
         <div className="grid grid-cols-3 gap-3 w-full md:w-auto">
-          <div className="p-3.5 rounded-2xl bg-gray-900/80 border border-gray-800 text-center min-w-[95px]">
-            <span className="block text-xl font-black text-white">{profileData?.artworks?.length || 0}</span>
-            <span className="text-[10px] uppercase font-bold text-gray-400">Artworks</span>
+          <div className="p-3.5 rounded-2xl bg-[#b8a074] border border-[#9d865c] text-center min-w-[95px]">
+            <span className="block text-xl font-black text-gray-950">{profileData?.artworks?.length || 0}</span>
+            <span className="text-[10px] uppercase font-bold text-gray-800">Artworks</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-gray-900/80 border border-gray-800 text-center min-w-[95px]">
-            <span className="block text-xl font-black text-white">{profileData?.commissions?.length || 0}</span>
-            <span className="text-[10px] uppercase font-bold text-gray-400">Contracts</span>
+          <div className="p-3.5 rounded-2xl bg-[#b8a074] border border-[#9d865c] text-center min-w-[95px]">
+            <span className="block text-xl font-black text-gray-950">{profileData?.commissions?.length || 0}</span>
+            <span className="text-[10px] uppercase font-bold text-gray-800">Contracts</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-gray-900/80 border border-gray-800 text-center min-w-[95px]">
-            <span className="block text-xl font-black text-white">{profileData?.submissions?.length || 0}</span>
-            <span className="text-[10px] uppercase font-bold text-gray-400">Contests</span>
+          <div className="p-3.5 rounded-2xl bg-[#b8a074] border border-[#9d865c] text-center min-w-[95px]">
+            <span className="block text-xl font-black text-gray-950">{profileData?.submissions?.length || 0}</span>
+            <span className="text-[10px] uppercase font-bold text-gray-800">Contests</span>
           </div>
         </div>
       </div>
 
       {saveMsg && (
-        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-fadeIn">
           <CheckCircle className="w-4 h-4" />
           {saveMsg}
         </div>
@@ -159,10 +159,10 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
         {/* Left Column: Consistent Artist Settings */}
-        <div className="lg:col-span-1 rounded-3xl border border-gray-800 bg-[#0F1422] p-6 space-y-5 shadow-xl">
-          <div className="flex items-center gap-2 pb-2 border-b border-gray-800">
-            <User className="w-4 h-4 text-amber-400" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Artist Profile Settings</h3>
+        <div className="lg:col-span-1 rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 space-y-5 shadow-xl">
+          <div className="flex items-center gap-2 pb-2 border-b border-[#ab946a]">
+            <User className="w-4 h-4 text-[#315812]" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-950">Artist Profile Settings</h3>
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
@@ -263,10 +263,10 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
         </div>
 
         {/* Right Column: Personal Activity Summaries */}
-        <div className="lg:col-span-2 rounded-3xl border border-gray-800 bg-[#0F1422] p-6 space-y-6 shadow-xl">
+        <div className="lg:col-span-2 rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 space-y-6 shadow-xl">
           
           {/* Subtab Buttons */}
-          <div className="flex items-center gap-2 border-b border-gray-800 pb-3">
+          <div className="flex items-center gap-2 border-b border-[#ab946a] pb-3">
             {[
               { id: 'artworks', label: 'My Published Artworks', icon: Image, count: profileData?.artworks?.length },
               { id: 'commissions', label: 'My Commission Tasks', icon: Briefcase, count: profileData?.commissions?.length },
@@ -280,13 +280,13 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
                   onClick={() => setActiveSubTab(tab.id)}
                   className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                     isActive
-                      ? 'bg-amber-500 text-gray-950 shadow-md shadow-amber-500/20'
-                      : 'text-gray-400 hover:text-white bg-gray-900/80 border border-gray-800/80'
+                      ? 'bg-gradient-to-r from-[#aca04d] to-[#315812] text-white shadow-md shadow-[#315812]/20'
+                      : 'text-gray-800 hover:text-gray-950 bg-[#b8a074] border border-[#9d865c]'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{tab.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-gray-800 text-gray-400'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-black/20 text-white' : 'bg-[#a89064] text-gray-950'}`}>
                     {tab.count || 0}
                   </span>
                 </button>

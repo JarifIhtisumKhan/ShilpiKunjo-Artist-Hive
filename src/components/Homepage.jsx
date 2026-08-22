@@ -99,17 +99,17 @@ export default function Homepage({ currentUser, onLogout }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0F19] text-gray-100 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#F3E3C5] text-gray-900 flex flex-col justify-between">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-gray-800/80 bg-[#0B0F19]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 glass-panel border-b border-amber-900/15 bg-[#F3E3C5]/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
             {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/20">
-                <div className="w-full h-full bg-[#0B0F19] rounded-[10px] flex items-center justify-center">
-                  <Palette className="w-5 h-5 text-amber-400" />
+                <div className="w-full h-full bg-[#F3E3C5] rounded-[10px] flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-amber-700" />
                 </div>
               </div>
               <div>

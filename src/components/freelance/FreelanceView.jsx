@@ -97,46 +97,46 @@ export default function FreelanceView({ currentUser }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       
       {/* Top Banner */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-gray-950 via-[#101524] to-gray-950 p-6 sm:p-8 rounded-3xl border border-gray-800/80 shadow-xl">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#c6ae82] p-6 sm:p-8 rounded-3xl border border-[#ab946a] shadow-xl">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Briefcase className="w-4 h-4 text-amber-400" />
-            <span className="text-xs font-black uppercase tracking-wider text-amber-400">Freelance Board</span>
+            <Briefcase className="w-4 h-4 text-[#315812]" />
+            <span className="text-xs font-black uppercase tracking-wider text-[#315812]">Freelance Board</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
             Artist Commission Opportunities
           </h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-gray-800 mt-1 max-w-xl">
             Connect clients with specialized visual artists for custom artwork, illustration contracts, and character designs.
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
           <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-gray-400 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-gray-700 absolute left-3.5 top-3" />
             <input
               type="text"
               placeholder="Search contract briefs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-gray-900 border border-gray-800 rounded-2xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500"
+              className="w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl pl-10 pr-4 py-2 text-xs text-gray-950 placeholder-gray-700 focus:outline-none focus:border-[#315812]"
             />
           </div>
 
           <button
             onClick={() => setIsPostModalOpen(true)}
-            className="w-full sm:w-auto px-4 py-2 rounded-2xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 hover:opacity-95 shadow-md shadow-amber-500/20 flex items-center justify-center gap-1.5"
+            className="w-full sm:w-auto px-4 py-2 rounded-2xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 shadow-md shadow-[#315812]/20 flex items-center justify-center gap-1.5"
           >
             <Plus className="w-4 h-4" />
-            <span>Post Commission Brief</span>
+            <span>Post Contract Brief</span>
           </button>
         </div>
       </div>
 
       {/* Status Filters (Deterministic) */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 pr-2 border-r border-gray-800">
-          <Filter className="w-3.5 h-3.5 text-amber-400" />
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-1.5 text-xs text-gray-700 pr-2 border-r border-[#ab946a]">
+          <Filter className="w-3.5 h-3.5 text-[#315812]" />
           <span>Status:</span>
         </div>
         {['All', 'Requested', 'Accepted', 'In Progress', 'Review', 'Completed'].map(status => (
@@ -145,8 +145,8 @@ export default function FreelanceView({ currentUser }) {
             onClick={() => setActiveStatus(status)}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeStatus === status
-                ? 'bg-amber-500 text-gray-950 shadow-md shadow-amber-500/20'
-                : 'bg-gray-900/80 text-gray-400 hover:text-white border border-gray-800/80'
+                ? 'bg-gradient-to-r from-[#aca04d] to-[#315812] text-white shadow-md shadow-[#315812]/20'
+                : 'bg-[#d8c5a0] text-gray-800 hover:text-gray-950 border border-[#bfa980] hover:bg-[#aca04d]/30'
             }`}
           >
             {status}
@@ -205,37 +205,37 @@ export default function FreelanceView({ currentUser }) {
 
       {/* Post Brief Modal */}
       {isPostModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="w-full max-w-lg bg-[#0F1422] border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-[#c6ae82] border border-[#ab946a] rounded-3xl p-6 sm:p-8 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-white">Post Freelance Art Brief</h3>
-              <button onClick={() => setIsPostModalOpen(false)} className="text-gray-400 hover:text-white">
+              <h3 className="text-lg font-bold text-gray-950">Post Freelance Art Brief</h3>
+              <button onClick={() => setIsPostModalOpen(false)} className="text-gray-700 hover:text-gray-950">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {postError && (
-              <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
+              <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 text-xs font-semibold">
                 {postError}
               </div>
             )}
 
             <form onSubmit={handlePostBrief} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Task Requirements *</label>
+                <label className="block text-xs font-bold text-gray-900 mb-1.5 uppercase">Task Requirements *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. 2D Fantasy Character Illustration (Print Ready)"
                   value={formReq}
                   onChange={(e) => setFormReq(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500"
+                  className="w-full bg-[#b8a074] border border-[#9d865c] rounded-xl p-2.5 text-xs text-gray-950 focus:border-[#315812]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Offered Budget ($) *</label>
+                  <label className="block text-xs font-bold text-gray-900 mb-1.5 uppercase">Offered Budget ($) *</label>
                   <input
                     type="number"
                     step="0.01"
@@ -243,29 +243,29 @@ export default function FreelanceView({ currentUser }) {
                     placeholder="e.g. 200.00"
                     value={formPrice}
                     onChange={(e) => setFormPrice(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500"
+                    className="w-full bg-[#b8a074] border border-[#9d865c] rounded-xl p-2.5 text-xs text-gray-950 focus:border-[#315812]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Deadline *</label>
+                  <label className="block text-xs font-bold text-gray-900 mb-1.5 uppercase">Deadline *</label>
                   <input
                     type="date"
                     required
                     value={formDeadline}
                     onChange={(e) => setFormDeadline(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500"
+                    className="w-full bg-[#b8a074] border border-[#9d865c] rounded-xl p-2.5 text-xs text-gray-950 focus:border-[#315812]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-gray-300 mb-1.5 uppercase">Description & Reference Notes</label>
+                <label className="block text-xs font-bold text-gray-900 mb-1.5 uppercase">Description & Reference Notes</label>
                 <textarea
                   rows={3}
                   placeholder="Detail colors, dimensions, reference links, and deliverable format..."
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500 resize-none"
+                  className="w-full bg-[#b8a074] border border-[#9d865c] rounded-xl p-2.5 text-xs text-gray-950 focus:border-[#315812] resize-none"
                 />
               </div>
 
@@ -273,14 +273,14 @@ export default function FreelanceView({ currentUser }) {
                 <button
                   type="button"
                   onClick={() => setIsPostModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs bg-gray-900 text-gray-400 hover:bg-gray-800"
+                  className="px-4 py-2 rounded-xl text-xs bg-[#b8a074] text-gray-800 hover:bg-[#a89064]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={postLoading}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-gray-950 hover:bg-amber-400"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95"
                 >
                   {postLoading ? 'Posting...' : 'Publish Brief'}
                 </button>
@@ -292,8 +292,8 @@ export default function FreelanceView({ currentUser }) {
 
       {/* Task Detail Modal */}
       {selectedTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="w-full max-w-lg bg-[#0F1422] border border-gray-800 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
+          <div className="w-full max-w-lg bg-[#c6ae82] border border-[#ab946a] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 {selectedTask.current_status}

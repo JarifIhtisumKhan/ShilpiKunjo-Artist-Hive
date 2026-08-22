@@ -70,20 +70,20 @@ export default function CoursesView({ currentUser }) {
         </button>
 
         {/* Course Header */}
-        <div className="rounded-3xl border border-gray-800 bg-[#0F1422] p-6 sm:p-8 space-y-4 shadow-xl">
+        <div className="rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-8 space-y-4 shadow-xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30">
                 {selectedCourse.category}
               </span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gray-800 text-gray-300">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#b8a074] text-gray-950">
                 {selectedCourse.difficulty} Level
               </span>
             </div>
             
             <button
               onClick={handleEnroll}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 hover:opacity-95 shadow-md shadow-amber-500/20 flex items-center gap-1.5"
+              className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 shadow-md shadow-[#315812]/20 flex items-center gap-1.5"
             >
               <CheckCircle2 className="w-4 h-4" />
               <span>Enroll In Masterclass</span>
@@ -91,40 +91,40 @@ export default function CoursesView({ currentUser }) {
           </div>
 
           {enrollMsg && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
+            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-bold flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4" />
               {enrollMsg}
             </div>
           )}
 
-          <h1 className="text-2xl sm:text-3xl font-black text-white">
+          <h1 className="text-2xl sm:text-3xl font-black text-gray-950">
             {selectedCourse.title}
           </h1>
 
           <div className="flex items-center gap-3 pt-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-bold text-xs text-gray-950">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#aca04d] to-[#315812] flex items-center justify-center font-bold text-xs text-white">
               {selectedCourse.instructor_name?.charAt(0) || 'I'}
             </div>
             <div>
-              <p className="text-xs text-gray-400">Instructor</p>
-              <h4 className="text-sm font-bold text-gray-200">{selectedCourse.instructor_name}</h4>
+              <p className="text-xs text-gray-700">Instructor</p>
+              <h4 className="text-sm font-bold text-gray-950">{selectedCourse.instructor_name}</h4>
             </div>
           </div>
         </div>
 
         {/* Linear Curriculum & Lesson List (Strictly Linear) */}
-        <div className="rounded-3xl border border-gray-800 bg-[#0F1422] p-6 sm:p-8 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-gray-800">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-amber-400" />
+        <div className="rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-8 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between pb-3 border-b border-[#ab946a]">
+            <h3 className="text-lg font-bold text-gray-950 flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#315812]" />
               Sequential Curriculum ({selectedCourse.lessons?.length || 0} Lessons)
             </h3>
-            <span className="text-xs text-gray-400">Step-by-Step Learning</span>
+            <span className="text-xs text-gray-700">Step-by-Step Learning</span>
           </div>
 
           <div className="space-y-3 pt-2">
             {(!selectedCourse.lessons || selectedCourse.lessons.length === 0) ? (
-              <p className="text-xs text-gray-500 italic">No lesson content uploaded yet.</p>
+              <p className="text-xs text-gray-700 italic">No lesson content uploaded yet.</p>
             ) : (
               selectedCourse.lessons.map((lesson, idx) => (
                 <a
@@ -132,24 +132,24 @@ export default function CoursesView({ currentUser }) {
                   href={lesson.content_url || "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 rounded-2xl bg-gray-900/60 border border-gray-800/80 hover:border-amber-500/50 hover:bg-gray-900 transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-4 rounded-2xl bg-[#b8a074] border border-[#9d865c] hover:border-[#315812] hover:bg-[#ad966a] transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-gray-800 group-hover:bg-amber-500/20 group-hover:text-amber-400 flex items-center justify-center text-xs font-bold text-gray-400 transition-colors">
+                    <div className="w-8 h-8 rounded-xl bg-[#a89064] group-hover:bg-[#315812] group-hover:text-white flex items-center justify-center text-xs font-bold text-gray-950 transition-colors">
                       {lesson.sequence_order}
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors">
+                      <h4 className="text-sm font-semibold text-gray-950 transition-colors">
                         {lesson.title}
                       </h4>
-                      <p className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3 text-gray-400" /> ~25 mins video lesson
+                      <p className="text-[11px] text-gray-700 flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3 h-3 text-gray-700" /> ~25 mins video lesson
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/30 group-hover:bg-amber-500 group-hover:text-gray-950 transition-all flex items-center gap-1.5 shadow-sm">
+                    <span className="text-xs font-bold text-white bg-gradient-to-r from-[#aca04d] to-[#315812] px-3 py-1.5 rounded-xl border border-[#315812]/30 flex items-center gap-1.5 shadow-sm">
                       <PlayCircle className="w-4 h-4" /> Start Lesson
                     </span>
                   </div>
@@ -168,15 +168,15 @@ export default function CoursesView({ currentUser }) {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       
       {/* Header Banner */}
-      <div className="bg-gradient-to-r from-gray-950 via-[#101524] to-gray-950 p-6 sm:p-8 rounded-3xl border border-gray-800/80 shadow-xl">
+      <div className="bg-[#c6ae82] p-6 sm:p-8 rounded-3xl border border-[#ab946a] shadow-xl">
         <div className="flex items-center gap-2 mb-1">
-          <GraduationCap className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-black uppercase tracking-wider text-amber-400">Masterclass Hub</span>
+          <GraduationCap className="w-4 h-4 text-[#315812]" />
+          <span className="text-xs font-black uppercase tracking-wider text-[#315812]">Masterclass Hub</span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
           Art Courses & Masterclasses
         </h1>
-        <p className="text-xs sm:text-sm text-gray-400 mt-1 max-w-xl">
+        <p className="text-xs sm:text-sm text-gray-800 mt-1 max-w-xl">
           Learn traditional Bengali painting, digital concept art, and 3D modeling with sequential curriculum taught by masters.
         </p>
       </div>
