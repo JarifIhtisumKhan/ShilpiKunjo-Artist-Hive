@@ -95,6 +95,16 @@ CREATE TABLE IF NOT EXISTS ChallengeSubmissions (
     FOREIGN KEY (artist_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS ChallengeVotes (
+    vote_id INT AUTO_INCREMENT PRIMARY KEY,
+    submission_id INT NOT NULL,
+    user_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT unique_user_vote UNIQUE (submission_id, user_id),
+    FOREIGN KEY (submission_id) REFERENCES ChallengeSubmissions(submission_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 4. Courses & Learning Platform
 CREATE TABLE IF NOT EXISTS Courses (
     course_id INT AUTO_INCREMENT PRIMARY KEY,

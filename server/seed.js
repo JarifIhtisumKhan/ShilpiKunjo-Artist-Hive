@@ -1,4 +1,5 @@
 import { initDb, run, queryAll, isSqlite } from './db.js';
+import { hashPassword } from './authUtils.js';
 
 async function seed() {
   console.log('--- Initializing Database Schema ---');
@@ -39,7 +40,7 @@ async function seed() {
   for (const u of users) {
     await run(
       `INSERT INTO Users (user_id, username, email, password_hash, name, phone_number, address) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [u.id, u.u, u.e, u.p, u.n, u.ph, u.a]
+      [u.id, u.u, u.e, hashPassword(u.p), u.n, u.ph, u.a]
     );
   }
 

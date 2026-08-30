@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 import { X, Upload, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { formatDriveImageUrl } from '../../utils/imageUtils.js';
 
-export function formatDriveImageUrl(url) {
-  if (!url) return '';
-  const trimmed = url.trim();
-  const driveMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
-  if (driveMatch && driveMatch[1]) {
-    return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
-  }
-  return trimmed;
-}
+export { formatDriveImageUrl };
 
 export default function UploadArtworkModal({ onClose, currentUser, onUploadSuccess }) {
   const [title, setTitle] = useState('');

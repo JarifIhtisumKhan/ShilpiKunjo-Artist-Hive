@@ -3,6 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { queryAll, queryOne, run, initDb } from './db.js';
+import { hashPassword, verifyPassword } from './authUtils.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,7 +37,7 @@ app.post('/api/auth/login', async (req, res) => {
       [username, username]
     );
 
-    if (!user || user.password_hash !== password) {
+    if (!user || !verifyPassword(password, user.password_hash)) {
       return res.status(401).json({ error: 'Invalid username/email or password.' });
     }
 
@@ -80,9 +81,10 @@ app.post('/api/auth/register', async (req, res) => {
       return res.status(400).json({ error: 'Username or email already registered' });
     }
 
+    const hashedPassword = hashPassword(password);
     const result = await run(
       `INSERT INTO Users (username, email, password_hash, name, phone_number, address) VALUES (?, ?, ?, ?, ?, ?)`,
-      [username, email, password, name, phone_number || '', address || '']
+      [username, email, hashedPassword, name, phone_number || '', address || '']
     );
 
     const userId = result.lastID;
@@ -271,12 +273,54 @@ app.get('/api/artworks', async (req, res) => {
 function formatDriveImageUrl(url) {
   if (!url) return '';
   const trimmed = String(url).trim();
-  const driveMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) || trimmed.match(/id=([a-zA-Z0-9_-]+)/);
+  const driveMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) ||
+                     trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
+                     trimmed.match(/id=([a-zA-Z0-9_-]+)/);
   if (driveMatch && driveMatch[1]) {
     return `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
   }
   return trimmed;
 }
+
+// Server-side Proxy for Google Drive images to bypass browser CORS & Referrer policy restrictions
+app.get('/api/drive-proxy/:id', async (req, res) => {
+  try {
+    const fileId = req.params.id;
+    if (!fileId) return res.status(400).send('Missing file ID');
+
+    const urlsToTry = [
+      `https://lh3.googleusercontent.com/d/${fileId}`,
+      `https://drive.google.com/thumbnail?id=${fileId}&sz=w1600`,
+      `https://drive.google.com/uc?export=download&id=${fileId}`
+    ];
+
+    for (const targetUrl of urlsToTry) {
+      try {
+        const response = await fetch(targetUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        });
+
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.startsWith('image/')) {
+            res.setHeader('Content-Type', contentType);
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            const arrayBuffer = await response.arrayBuffer();
+            return res.send(Buffer.from(arrayBuffer));
+          }
+        }
+      } catch (e) {
+        // Try next format
+      }
+    }
+
+    res.redirect('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=900&auto=format&fit=crop');
+  } catch (err) {
+    res.redirect('https://images.unsplash.com/photo-1579783902614-a3fb3927b675?q=80&w=900&auto=format&fit=crop');
+  }
+});
 
 // Post new Artwork to Feed
 app.post('/api/artworks', async (req, res) => {
@@ -521,7 +565,9 @@ app.post('/api/courses/:id/enroll', async (req, res) => {
 // Get Commission Job Board (Deterministic Newest First)
 app.get('/api/commissions', async (req, res) => {
   try {
-    const { status, search } = req.query;
+    const { status, search, userId, user_id } = req.query;
+    const activeUserId = userId || user_id;
+
     let sql = `
       SELECT c.*, u.name as client_name, u.username as client_username,
              ua.name as artist_name, ua.username as artist_username
@@ -532,6 +578,15 @@ app.get('/api/commissions', async (req, res) => {
       WHERE 1=1
     `;
     const params = [];
+
+    // Privacy rule: anyone other than the client and commissioner cannot view/access non-Requested tasks
+    if (activeUserId) {
+      sql += ` AND (c.current_status = 'Requested' OR c.client_id = ? OR c.artist_id = ?)`;
+      params.push(activeUserId, activeUserId);
+    } else {
+      sql += ` AND c.current_status = 'Requested'`;
+    }
+
     if (status && status !== 'All') {
       sql += ` AND c.current_status = ?`;
       params.push(status);
@@ -552,15 +607,17 @@ app.get('/api/commissions', async (req, res) => {
 // Post a New Freelance Commission Task
 app.post('/api/commissions', async (req, res) => {
   try {
-    const { client_id, artist_id, requirements, description, price_offered, deadline } = req.body;
+    const { client_id, artist_id, requirements, description, price_offered, deadline, media_url } = req.body;
     if (!client_id || !requirements || !price_offered || !deadline) {
       return res.status(400).json({ error: 'Missing required commission fields' });
     }
 
+    const sanitizedMediaUrl = media_url ? formatDriveImageUrl(media_url) : '';
+
     const result = await run(
-      `INSERT INTO Commissions (client_id, artist_id, requirements, description, price_offered, deadline, current_status)
-       VALUES (?, ?, ?, ?, ?, ?, 'Requested')`,
-      [client_id, artist_id || null, requirements, description || '', price_offered, deadline]
+      `INSERT INTO Commissions (client_id, artist_id, requirements, description, price_offered, deadline, current_status, media_url)
+       VALUES (?, ?, ?, ?, ?, ?, 'Requested', ?)`,
+      [client_id, artist_id || null, requirements, description || '', price_offered, deadline, sanitizedMediaUrl]
     );
 
     res.status(201).json({ task_id: result.lastID, message: 'Commission brief posted successfully' });
@@ -573,7 +630,20 @@ app.post('/api/commissions', async (req, res) => {
 app.patch('/api/commissions/:id/status', async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { current_status, artist_id } = req.body;
+    const { current_status, artist_id, userId, user_id } = req.body;
+    const requestingUserId = userId || user_id || artist_id;
+
+    const existing = await queryOne(`SELECT * FROM Commissions WHERE task_id = ?`, [taskId]);
+    if (!existing) {
+      return res.status(404).json({ error: 'Commission task not found' });
+    }
+
+    // If task is non-Requested (already accepted/in progress/review/completed), only client or assigned artist can update
+    if (existing.current_status !== 'Requested') {
+      if (requestingUserId && Number(existing.client_id) !== Number(requestingUserId) && Number(existing.artist_id) !== Number(requestingUserId)) {
+        return res.status(403).json({ error: 'Unauthorized: Only the client or commissioner can update this task' });
+      }
+    }
 
     let sql = `UPDATE Commissions SET current_status = ?`;
     const params = [current_status];
@@ -624,6 +694,9 @@ app.get('/api/challenges', async (req, res) => {
 app.get('/api/challenges/:id/submissions', async (req, res) => {
   try {
     const challengeId = req.params.id;
+    const { userId, user_id } = req.query;
+    const activeUserId = userId || user_id;
+
     const challenge = await queryOne(`SELECT * FROM Challenges WHERE challenge_id = ?`, [challengeId]);
     if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
 
@@ -640,7 +713,19 @@ app.get('/api/challenges/:id/submissions', async (req, res) => {
       [challengeId]
     );
 
-    res.json({ challenge, submissions });
+    let user_votes = [];
+    if (activeUserId) {
+      const voteRows = await queryAll(
+        `SELECT cv.submission_id 
+         FROM ChallengeVotes cv 
+         JOIN ChallengeSubmissions cs ON cv.submission_id = cs.submission_id 
+         WHERE cs.challenge_id = ? AND cv.user_id = ?`,
+        [challengeId, activeUserId]
+      );
+      user_votes = voteRows.map(r => r.submission_id);
+    }
+
+    res.json({ challenge, submissions, user_votes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -672,8 +757,34 @@ app.post('/api/challenges/:id/submit', async (req, res) => {
 app.post('/api/challenges/submissions/:id/vote', async (req, res) => {
   try {
     const submissionId = req.params.id;
+    const { user_id, userId } = req.body;
+    const voterId = user_id || userId;
+
+    if (!voterId) {
+      return res.status(401).json({ error: 'You must be logged in to vote.' });
+    }
+
+    const sub = await queryOne(`SELECT * FROM ChallengeSubmissions WHERE submission_id = ?`, [submissionId]);
+    if (!sub) {
+      return res.status(404).json({ error: 'Contest submission not found.' });
+    }
+
+    // Rule 1: Contestants cannot vote for their own submissions
+    if (Number(sub.artist_id) === Number(voterId)) {
+      return res.status(400).json({ error: 'Contestants cannot vote for their own submissions.' });
+    }
+
+    // Rule 2: No one can vote more than once per submission
+    const existingVote = await queryOne(`SELECT * FROM ChallengeVotes WHERE submission_id = ? AND user_id = ?`, [submissionId, voterId]);
+    if (existingVote) {
+      return res.status(400).json({ error: 'You have already voted for this submission.' });
+    }
+
+    // Record the vote
+    await run(`INSERT INTO ChallengeVotes (submission_id, user_id) VALUES (?, ?)`, [submissionId, voterId]);
     await run(`UPDATE ChallengeSubmissions SET vote_count = vote_count + 1 WHERE submission_id = ?`, [submissionId]);
-    res.json({ success: true, message: 'Vote recorded!' });
+
+    res.json({ success: true, message: 'Vote recorded successfully!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

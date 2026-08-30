@@ -3,6 +3,7 @@ import { Search, Heart, MessageSquare, Sparkles, Filter, Plus, Eye } from 'lucid
 import MasonryEngine from '../common/MasonryEngine.jsx';
 import ArtworkDetailModal from './ArtworkDetailModal.jsx';
 import UploadArtworkModal from './UploadArtworkModal.jsx';
+import { handleImageError } from '../../utils/imageUtils.js';
 
 export default function FeedView({ currentUser }) {
   const [artworks, setArtworks] = useState([]);
@@ -137,11 +138,8 @@ export default function FeedView({ currentUser }) {
               src={art.media_url}
               alt={art.title}
               loading="lazy"
-              onError={(e) => {
-                if (art.media_url?.includes('16VDnfv6VbfXHMZ-ONnMsdL1EU3oM1F6U')) {
-                  e.target.src = '/artworks/art_9.jpg';
-                }
-              }}
+              referrerPolicy="no-referrer"
+              onError={(e) => handleImageError(e, art.media_url)}
               className="w-full h-auto object-cover transition-transform duration-500 group-hover/card:scale-105"
             />
 

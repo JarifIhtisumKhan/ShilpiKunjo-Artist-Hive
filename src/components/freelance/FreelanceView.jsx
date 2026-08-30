@@ -19,12 +19,15 @@ export default function FreelanceView({ currentUser }) {
 
   useEffect(() => {
     fetchCommissions();
-  }, [activeStatus, searchQuery]);
+  }, [activeStatus, searchQuery, currentUser]);
 
   const fetchCommissions = async () => {
     setLoading(true);
     try {
       let url = `/api/commissions?status=${encodeURIComponent(activeStatus)}`;
+      if (currentUser?.user_id) {
+        url += `&userId=${encodeURIComponent(currentUser.user_id)}`;
+      }
       if (searchQuery.trim()) {
         url += `&search=${encodeURIComponent(searchQuery.trim())}`;
       }
@@ -36,6 +39,16 @@ export default function FreelanceView({ currentUser }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const canAccessTask = (task) => {
+    if (!task) return false;
+    if (task.current_status === 'Requested') return true;
+    if (!currentUser) return false;
+    return (
+      Number(task.client_id) === Number(currentUser.user_id) ||
+      Number(task.artist_id) === Number(currentUser.user_id)
+    );
   };
 
   const handlePostBrief = async (e) => {
@@ -73,15 +86,16 @@ export default function FreelanceView({ currentUser }) {
     }
   };
 
-  const handleApply = async (task) => {
-    if (!currentUser?.is_artist) return;
+  const handleUpdateStatus = async (task, newStatus) => {
+    if (!currentUser) return;
     try {
       const res = await fetch(`/api/commissions/${task.task_id}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          current_status: 'Accepted',
-          artist_id: currentUser.user_id
+          current_status: newStatus,
+          artist_id: task.artist_id || currentUser.user_id,
+          userId: currentUser.user_id
         })
       });
       if (res.ok) {
@@ -89,9 +103,11 @@ export default function FreelanceView({ currentUser }) {
         setSelectedTask(null);
       }
     } catch (err) {
-      console.error('Error accepting commission:', err);
+      console.error('Error updating commission status:', err);
     }
   };
+
+  const accessibleCommissions = commissions.filter(canAccessTask);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
@@ -155,53 +171,68 @@ export default function FreelanceView({ currentUser }) {
       </div>
 
       {/* Deterministic Job Board Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {commissions.map(task => (
-          <div
-            key={task.task_id}
-            onClick={() => setSelectedTask(task)}
-            className="group cursor-pointer rounded-3xl bg-gray-900/90 border border-gray-800 hover:border-amber-500/50 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl space-y-4"
-          >
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-                  task.current_status === 'Requested'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : task.current_status === 'In Progress'
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
-                    : 'bg-gray-800 text-gray-400 border border-gray-700'
-                }`}>
-                  {task.current_status}
-                </span>
-                <span className="text-xs font-black text-amber-400">
-                  ${parseFloat(task.price_offered).toFixed(2)}
-                </span>
+      {accessibleCommissions.length === 0 ? (
+        <div className="text-center py-12 bg-[#c6ae82]/40 rounded-3xl border border-[#ab946a] p-8">
+          <Briefcase className="w-10 h-10 text-[#315812] mx-auto mb-3 opacity-60" />
+          <h3 className="text-base font-bold text-gray-900">No Visible Commissions</h3>
+          <p className="text-xs text-gray-700 max-w-md mx-auto mt-1">
+            There are no contract briefs matching this filter, or active/completed tasks are private to their client and commissioner.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {accessibleCommissions.map(task => (
+            <div
+              key={task.task_id}
+              onClick={() => setSelectedTask(task)}
+              className="group cursor-pointer rounded-3xl bg-gray-900/90 border border-gray-800 hover:border-amber-500/50 transition-all duration-300 p-6 flex flex-col justify-between shadow-xl space-y-4"
+            >
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
+                    task.current_status === 'Requested'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                      : task.current_status === 'In Progress'
+                      ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30'
+                      : task.current_status === 'Review'
+                      ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                      : task.current_status === 'Completed'
+                      ? 'bg-emerald-600/30 text-emerald-200 border border-emerald-500/40'
+                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  }`}>
+                    {task.current_status}
+                  </span>
+                  <span className="text-xs font-black text-amber-400">
+                    ${parseFloat(task.price_offered).toFixed(2)}
+                  </span>
+                </div>
+
+                <h3 className="text-base font-bold text-white group-hover:text-amber-400 transition-colors leading-snug">
+                  {task.requirements}
+                </h3>
+
+                {task.description && (
+                  <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                    {task.description}
+                  </p>
+                )}
               </div>
 
-              <h3 className="text-base font-bold text-white group-hover:text-amber-400 transition-colors leading-snug">
-                {task.requirements}
-              </h3>
-
-              {task.description && (
-                <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
-                  {task.description}
-                </p>
-              )}
+              <div className="border-t border-gray-800/60 pt-3 flex items-center justify-between text-xs text-gray-400">
+                <div className="flex items-center gap-1.5">
+                  <User className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Client: {task.client_name}</span>
+                </div>
+                {task.artist_name && (
+                  <div className="text-[11px] text-amber-300/80 font-medium">
+                    Artist: {task.artist_name}
+                  </div>
+                )}
+              </div>
             </div>
-
-            <div className="border-t border-gray-800/60 pt-3 flex items-center justify-between text-xs text-gray-400">
-              <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-amber-400" />
-                <span>{task.client_name}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-amber-400" />
-                <span>{new Date(task.deadline).toLocaleDateString()}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Post Brief Modal */}
       {isPostModalOpen && (
@@ -291,48 +322,78 @@ export default function FreelanceView({ currentUser }) {
       )}
 
       {/* Task Detail Modal */}
-      {selectedTask && (
+      {selectedTask && canAccessTask(selectedTask) && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
           <div className="w-full max-w-lg bg-[#c6ae82] border border-[#ab946a] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
                 {selectedTask.current_status}
               </span>
-              <button onClick={() => setSelectedTask(null)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setSelectedTask(null)} className="text-gray-700 hover:text-gray-950">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <h2 className="text-xl font-bold text-white">{selectedTask.requirements}</h2>
+            <h2 className="text-xl font-bold text-gray-950">{selectedTask.requirements}</h2>
             
             {selectedTask.description && (
-              <p className="text-xs text-gray-300 leading-relaxed bg-gray-950/60 p-4 rounded-2xl border border-gray-800">
+              <p className="text-xs text-gray-900 leading-relaxed bg-[#b8a074] p-4 rounded-2xl border border-[#9d865c]">
                 {selectedTask.description}
               </p>
             )}
 
             <div className="grid grid-cols-2 gap-3 text-xs pt-2">
-              <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800">
-                <p className="text-gray-400">Offered Budget</p>
-                <p className="text-base font-black text-amber-400">${parseFloat(selectedTask.price_offered).toFixed(2)}</p>
+              <div className="p-3 rounded-xl bg-[#b8a074] border border-[#9d865c]">
+                <p className="text-gray-800 text-[10px] uppercase font-bold">Offered Budget</p>
+                <p className="text-base font-black text-[#315812]">${parseFloat(selectedTask.price_offered).toFixed(2)}</p>
               </div>
-              <div className="p-3 rounded-xl bg-gray-900/60 border border-gray-800">
-                <p className="text-gray-400">Deadline</p>
-                <p className="text-sm font-bold text-gray-200">{new Date(selectedTask.deadline).toLocaleDateString()}</p>
+              <div className="p-3 rounded-xl bg-[#b8a074] border border-[#9d865c]">
+                <p className="text-gray-800 text-[10px] uppercase font-bold">Deadline</p>
+                <p className="text-sm font-bold text-gray-950">{new Date(selectedTask.deadline).toLocaleDateString()}</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between pt-4 border-t border-gray-800">
-              <div className="text-xs text-gray-400">
-                Posted by <span className="font-bold text-gray-200">{selectedTask.client_name}</span>
-              </div>
+            <div className="text-xs text-gray-800 pt-1 space-y-1">
+              <p>Client: <span className="font-bold text-gray-950">{selectedTask.client_name}</span></p>
+              {selectedTask.artist_name && (
+                <p>Assigned Artist / Commissioner: <span className="font-bold text-[#315812]">{selectedTask.artist_name}</span></p>
+              )}
+            </div>
 
+            <div className="flex items-center justify-end gap-2 pt-4 border-t border-[#ab946a]">
               {selectedTask.current_status === 'Requested' && currentUser?.is_artist && (
                 <button
-                  onClick={() => handleApply(selectedTask)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-gray-950 hover:bg-amber-400"
+                  onClick={() => handleUpdateStatus(selectedTask, 'Accepted')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95"
                 >
                   Accept Commission
+                </button>
+              )}
+
+              {selectedTask.current_status === 'Accepted' && Number(selectedTask.artist_id) === Number(currentUser?.user_id) && (
+                <button
+                  onClick={() => handleUpdateStatus(selectedTask, 'In Progress')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white hover:bg-blue-500"
+                >
+                  Mark In Progress
+                </button>
+              )}
+
+              {selectedTask.current_status === 'In Progress' && Number(selectedTask.artist_id) === Number(currentUser?.user_id) && (
+                <button
+                  onClick={() => handleUpdateStatus(selectedTask, 'Review')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-600 text-white hover:bg-purple-500"
+                >
+                  Submit for Review
+                </button>
+              )}
+
+              {selectedTask.current_status === 'Review' && Number(selectedTask.client_id) === Number(currentUser?.user_id) && (
+                <button
+                  onClick={() => handleUpdateStatus(selectedTask, 'Completed')}
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-700 text-white hover:bg-emerald-600"
+                >
+                  Approve & Complete Task
                 </button>
               )}
             </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { User, ShieldCheck, Sparkles, Briefcase, Trophy, Image, CheckCircle, Save, Plus, X, Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
 import ArtworkDetailModal from '../feed/ArtworkDetailModal';
+import { handleImageError } from '../../utils/imageUtils.js';
 
 export default function DashboardView({ currentUser, onProfileUpdated }) {
   const [profileData, setProfileData] = useState(null);
@@ -315,7 +316,13 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
                       onClick={() => setSelectedArtwork(art)}
                       className="rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 shadow-md group cursor-pointer hover:border-amber-500/50 transition-all"
                     >
-                      <img src={art.media_url} alt={art.title} className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                      <img
+                        src={art.media_url}
+                        alt={art.title}
+                        referrerPolicy="no-referrer"
+                        onError={(e) => handleImageError(e, art.media_url)}
+                        className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
                       <div className="p-3">
                         <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-400 transition-colors">{art.title}</h4>
                         <div className="flex items-center justify-between mt-1 text-[10px] text-gray-400">

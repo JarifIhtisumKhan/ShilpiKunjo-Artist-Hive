@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageSquare, Send, User, Calendar, Sparkles, Tag, ShieldCheck, Pencil, Trash2, Check, AlertTriangle, Loader2 } from 'lucide-react';
-import { formatDriveImageUrl } from './UploadArtworkModal';
+import { formatDriveImageUrl, handleImageError } from '../../utils/imageUtils.js';
 
 export default function ArtworkDetailModal({
   artwork,
@@ -188,11 +188,8 @@ export default function ArtworkDetailModal({
           <img
             src={isEditing ? editMediaUrl : artwork.media_url}
             alt={artwork.title}
-            onError={(e) => {
-              if (artwork.media_url?.includes('16VDnfv6VbfXHMZ-ONnMsdL1EU3oM1F6U')) {
-                e.target.src = '/artworks/art_9.jpg';
-              }
-            }}
+            referrerPolicy="no-referrer"
+            onError={(e) => handleImageError(e, isEditing ? editMediaUrl : artwork.media_url)}
             className="max-h-[75vh] w-auto object-contain rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.01]"
           />
         </div>

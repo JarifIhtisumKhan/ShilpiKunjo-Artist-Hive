@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Calendar, Users, ArrowLeft, Plus, CheckCircle, Flame, Medal, Sparkles, Heart } from 'lucide-react';
 import MasonryEngine from '../common/MasonryEngine.jsx';
+import { handleImageError } from '../../utils/imageUtils.js';
 
 export default function ContestsView({ currentUser }) {
   const [challenges, setChallenges] = useState([]);
@@ -8,6 +9,7 @@ export default function ContestsView({ currentUser }) {
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [userVotes, setUserVotes] = useState([]);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [userArtworks, setUserArtworks] = useState([]);
   const [selectedArtId, setSelectedArtId] = useState('');
@@ -34,9 +36,14 @@ export default function ContestsView({ currentUser }) {
     setSelectedChallenge(challenge);
     setSubmissionsLoading(true);
     try {
-      const res = await fetch(`/api/challenges/${challenge.challenge_id}/submissions`);
+      let url = `/api/challenges/${challenge.challenge_id}/submissions`;
+      if (currentUser?.user_id) {
+        url += `?userId=${encodeURIComponent(currentUser.user_id)}`;
+      }
+      const res = await fetch(url);
       const data = await res.json();
       setSubmissions(data.submissions || []);
+      setUserVotes(Array.isArray(data.user_votes) ? data.user_votes : []);
     } catch (err) {
       console.error('Error loading submissions:', err);
     } finally {
@@ -46,13 +53,22 @@ export default function ContestsView({ currentUser }) {
 
   const handleVote = async (e, sub) => {
     e.stopPropagation();
+    if (!currentUser) return;
+    if (Number(sub.artist_id) === Number(currentUser.user_id)) return;
+    if (userVotes.includes(sub.submission_id)) return;
+
     try {
-      const res = await fetch(`/api/challenges/submissions/${sub.submission_id}/vote`, { method: 'POST' });
+      const res = await fetch(`/api/challenges/submissions/${sub.submission_id}/vote`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: currentUser.user_id })
+      });
       if (res.ok) {
         setSubmissions(prev =>
           prev.map(s => s.submission_id === sub.submission_id ? { ...s, vote_count: s.vote_count + 1 } : s)
             .sort((a, b) => b.vote_count - a.vote_count)
         );
+        setUserVotes(prev => [...prev, sub.submission_id]);
       }
     } catch (err) {
       console.error('Error voting:', err);
@@ -181,6 +197,8 @@ export default function ContestsView({ currentUser }) {
                   src={sub.media_url}
                   alt={sub.artwork_title}
                   loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onError={(e) => handleImageError(e, sub.media_url)}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
@@ -217,12 +235,25 @@ export default function ContestsView({ currentUser }) {
                     </span>
 
                     {selectedChallenge.status === 'Active' && (
-                      <button
-                        onClick={(e) => handleVote(e, sub)}
-                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#aca04d]/20 text-[#315812] hover:bg-[#aca04d] hover:text-white transition-colors border border-[#315812]/30"
-                      >
-                        + Vote
-                      </button>
+                      Number(sub.artist_id) === Number(currentUser?.user_id) ? (
+                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#b8a074] text-gray-800 border border-[#9d865c]">
+                          Your Entry
+                        </span>
+                      ) : userVotes.includes(sub.submission_id) ? (
+                        <button
+                          disabled
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-600/20 text-emerald-800 border border-emerald-500/40 opacity-90 cursor-default"
+                        >
+                          Voted ✓
+                        </button>
+                      ) : (
+                        <button
+                          onClick={(e) => handleVote(e, sub)}
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#aca04d]/20 text-[#315812] hover:bg-[#aca04d] hover:text-white transition-colors border border-[#315812]/30"
+                        >
+                          + Vote
+                        </button>
+                      )
                     )}
                   </div>
                 </div>
