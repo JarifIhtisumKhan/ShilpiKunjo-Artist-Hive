@@ -246,7 +246,7 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
                 <button
                   type="button"
                   onClick={handleAddExpertise}
-                  className="px-3 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-bold text-white transition-colors"
+                  className="btn-stone-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-100 transition-colors"
                 >
                   Add
                 </button>
@@ -255,10 +255,10 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
 
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 font-bold text-xs flex items-center justify-center gap-2 hover:opacity-95 shadow-md shadow-amber-500/20 transition-all"
+              className="btn-stone w-full py-2.5 rounded-xl text-stone-100 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
             >
-              <Save className="w-4 h-4" />
-              <span>Save Artist Profile</span>
+              <Save className="w-4 h-4 text-amber-300" />
+              <span>Save Profile Changes</span>
             </button>
           </form>
         </div>

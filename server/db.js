@@ -89,9 +89,9 @@ export async function initDb() {
       if (!hasDesc && checkCols.length > 0) {
         console.log('Legacy SQLite schema detected. Recreating tables for updated schema...');
         const tables = [
-          'OrderItems', 'Orders', 'MarketplaceProducts', 'Commissions',
+          'Commissions',
           'CourseEnrollments', 'CourseContent', 'Courses', 'ChallengeSubmissions',
-          'Challenges', 'ArtworkReactions', 'ArtworkComments', 'Artworks',
+          'Challenges', 'ArtworkComments', 'Artworks',
           'ArtistExpertise', 'Artists', 'Admins', 'Users'
         ];
         for (const t of tables) {
@@ -156,15 +156,6 @@ export async function initDb() {
         FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
       );
 
-      CREATE TABLE IF NOT EXISTS ArtworkReactions (
-        user_id INTEGER,
-        art_id INTEGER,
-        reaction_type TEXT DEFAULT 'like',
-        PRIMARY KEY (user_id, art_id),
-        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-        FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE
-      );
-
       CREATE TABLE IF NOT EXISTS Challenges (
         challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
         creator_id INTEGER NOT NULL,
@@ -190,16 +181,6 @@ export async function initDb() {
         FOREIGN KEY (challenge_id) REFERENCES Challenges(challenge_id) ON DELETE CASCADE,
         FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE,
         FOREIGN KEY (artist_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
-      );
-
-      CREATE TABLE IF NOT EXISTS ChallengeVotes (
-        vote_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        submission_id INTEGER NOT NULL,
-        user_id INTEGER NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE (submission_id, user_id),
-        FOREIGN KEY (submission_id) REFERENCES ChallengeSubmissions(submission_id) ON DELETE CASCADE,
-        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS Courses (
@@ -246,38 +227,6 @@ export async function initDb() {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (client_id) REFERENCES Users(user_id),
         FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
-      );
-
-      CREATE TABLE IF NOT EXISTS MarketplaceProducts (
-        product_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        seller_id INTEGER NOT NULL,
-        category TEXT NOT NULL,
-        title TEXT NOT NULL,
-        description TEXT,
-        media_url TEXT NOT NULL,
-        price REAL NOT NULL,
-        stock_amount INTEGER DEFAULT 1,
-        ratings REAL DEFAULT 0.00,
-        FOREIGN KEY (seller_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
-      );
-
-      CREATE TABLE IF NOT EXISTS Orders (
-        order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        buyer_id INTEGER NOT NULL,
-        total_amount REAL NOT NULL,
-        payment_status TEXT DEFAULT 'Paid',
-        order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (buyer_id) REFERENCES Users(user_id)
-      );
-
-      CREATE TABLE IF NOT EXISTS OrderItems (
-        order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        order_id INTEGER NOT NULL,
-        product_id INTEGER NOT NULL,
-        quantity INTEGER NOT NULL,
-        subtotal REAL NOT NULL,
-        FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
-        FOREIGN KEY (product_id) REFERENCES MarketplaceProducts(product_id)
       );
     `);
     console.log('SQLite DDL Schema applied successfully.');

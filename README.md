@@ -1,6 +1,6 @@
 # ShilpiKunjo (Artist Hive) 🎨✨
 
-**ShilpiKunjo (Artist Hive)** is a full-stack platform designed for South Asian artists and creators to showcase artwork, participate in creative challenges, list products on an art marketplace, manage custom commissions, and host/enroll in creative courses.
+**ShilpiKunjo (Artist Hive)** is a full-stack platform designed for South Asian artists and creators to showcase artwork, participate in creative challenges, manage custom commissions, and host/enroll in creative courses.
 
 ---
 

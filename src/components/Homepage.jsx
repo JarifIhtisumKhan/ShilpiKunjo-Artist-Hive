@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, Sparkles, Briefcase, Trophy, GraduationCap, ShoppingBag, User, LogOut, ShieldAlert, ArrowRight, CheckCircle2, Database, Layers, X } from 'lucide-react';
+import { Palette, Sparkles, Briefcase, Trophy, GraduationCap, User, LogOut, ShieldAlert, ArrowRight, CheckCircle2, Database, Layers, X } from 'lucide-react';
 
 export default function Homepage({ currentUser, onLogout }) {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -13,7 +13,7 @@ export default function Homepage({ currentUser, onLogout }) {
       color: 'from-amber-500 to-orange-500',
       badge: 'Community Showcase',
       description: 'Explore digital art, hand-drawn sketches, and 3D animations from Bangladeshi visual artists. Interact with likes, reactions, and feedback comments.',
-      schemaTables: ['Artworks', 'ArtworkComments', 'ArtworkReactions'],
+      schemaTables: ['Artworks', 'ArtworkComments'],
       features: [
         'Masonry feed sorting by Digital, Hand-drawn, & Animation',
         'Artwork reaction count & comment feedback thread',
@@ -64,21 +64,6 @@ export default function Homepage({ currentUser, onLogout }) {
         'Filter courses by difficulty (Beginner, Intermediate, Advanced)',
         'Sequential video lesson curriculum and learning materials',
         'Student course enrollment and completion status tracking'
-      ]
-    },
-    {
-      id: 'marketplace',
-      title: 'Artisan Marketplace',
-      subtitle: 'Module 6: E-Commerce & Product Inventory',
-      icon: ShoppingBag,
-      color: 'from-purple-500 to-pink-600',
-      badge: 'E-Commerce Store',
-      description: 'Buy and sell physical terracotta handcrafts, museum-grade canvas prints, 3D modular assets, and custom Procreate brush packs.',
-      schemaTables: ['MarketplaceProducts', 'Orders', 'OrderItems'],
-      features: [
-        'Product listing & inventory stock management for sellers',
-        'Shopping cart & instant checkout transaction',
-        'SQL Orders and OrderItems generation with automated stock deduction'
       ]
     },
     {
@@ -173,7 +158,7 @@ export default function Homepage({ currentUser, onLogout }) {
             <Layers className="w-5 h-5 text-amber-400" />
             Platform Options & System Modules
           </h2>
-          <span className="text-xs text-gray-400 font-semibold">MariaDB Schema • 16 Relational Tables</span>
+          <span className="text-xs text-gray-400 font-semibold">MariaDB Schema • 12 Relational Tables</span>
         </div>
 
         {/* Options Cards Grid */}

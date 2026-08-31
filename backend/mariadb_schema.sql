@@ -58,15 +58,6 @@ CREATE TABLE IF NOT EXISTS ArtworkComments (
     FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS ArtworkReactions (
-    user_id INT,
-    art_id INT,
-    reaction_type VARCHAR(20) DEFAULT 'like',
-    PRIMARY KEY (user_id, art_id),
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- 3. Art Challenges & Submissions
 CREATE TABLE IF NOT EXISTS Challenges (
     challenge_id INT AUTO_INCREMENT PRIMARY KEY,
@@ -93,16 +84,6 @@ CREATE TABLE IF NOT EXISTS ChallengeSubmissions (
     FOREIGN KEY (challenge_id) REFERENCES Challenges(challenge_id) ON DELETE CASCADE,
     FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE,
     FOREIGN KEY (artist_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS ChallengeVotes (
-    vote_id INT AUTO_INCREMENT PRIMARY KEY,
-    submission_id INT NOT NULL,
-    user_id INT NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT unique_user_vote UNIQUE (submission_id, user_id),
-    FOREIGN KEY (submission_id) REFERENCES ChallengeSubmissions(submission_id) ON DELETE CASCADE,
-    FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 4. Courses & Learning Platform
@@ -153,35 +134,3 @@ CREATE TABLE IF NOT EXISTS Commissions (
     FOREIGN KEY (artist_id) REFERENCES Artists(artist_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 6. Marketplace & E-Commerce
-CREATE TABLE IF NOT EXISTS MarketplaceProducts (
-    product_id INT AUTO_INCREMENT PRIMARY KEY,
-    seller_id INT NOT NULL,
-    category VARCHAR(100) NOT NULL,
-    title VARCHAR(255) NOT NULL,
-    description TEXT,
-    media_url TEXT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
-    stock_amount INT DEFAULT 1,
-    ratings DECIMAL(3, 2) DEFAULT 0.00,
-    FOREIGN KEY (seller_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS Orders (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    buyer_id INT NOT NULL,
-    total_amount DECIMAL(10, 2) NOT NULL,
-    payment_status VARCHAR(50) DEFAULT 'Paid',
-    order_date DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (buyer_id) REFERENCES Users(user_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS OrderItems (
-    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity INT NOT NULL,
-    subtotal DECIMAL(10, 2) NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE,
-    FOREIGN KEY (product_id) REFERENCES MarketplaceProducts(product_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

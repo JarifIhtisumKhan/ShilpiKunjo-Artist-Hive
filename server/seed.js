@@ -12,9 +12,9 @@ async function seed() {
     await run('SET FOREIGN_KEY_CHECKS = 0');
   }
   const tables = [
-    'OrderItems', 'Orders', 'MarketplaceProducts', 'Commissions',
+    'Commissions',
     'CourseEnrollments', 'CourseContent', 'Courses', 'ChallengeSubmissions',
-    'Challenges', 'ArtworkReactions', 'ArtworkComments', 'Artworks',
+    'Challenges', 'ArtworkComments', 'Artworks',
     'ArtistExpertise', 'Artists', 'Admins', 'Users'
   ];
   for (const t of tables) {

@@ -474,9 +474,9 @@ export default function ArtworkDetailModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !newComment.trim()}
-                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 font-bold text-xs flex items-center justify-center hover:opacity-95 disabled:opacity-50 transition-opacity"
+                className="btn-stone px-3.5 py-2 rounded-xl text-stone-100 font-bold text-xs flex items-center justify-center hover:opacity-95 disabled:opacity-50 transition-opacity"
               >
-                <Send className="w-3.5 h-3.5" />
+                <Send className="w-3.5 h-3.5 text-amber-300" />
               </button>
             </form>
 

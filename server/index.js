@@ -239,11 +239,11 @@ app.get('/api/artworks', async (req, res) => {
     const { type, search, artist_id } = req.query;
     let sql = `
       SELECT a.art_id, a.artist_id, a.title, a.type, a.description, a.media_url, a.react_count, a.created_at,
-             u.name as artist_name, u.username as artist_username, ar.bio as artist_bio,
+             u.name as artist_name, u.username as artist_username, COALESCE(ar.bio, '') as artist_bio,
              (SELECT COUNT(*) FROM ArtworkComments ac WHERE ac.art_id = a.art_id) as comments_count
       FROM Artworks a
-      JOIN Artists ar ON a.artist_id = ar.artist_id
       JOIN Users u ON a.artist_id = u.user_id
+      LEFT JOIN Artists ar ON a.artist_id = ar.artist_id
       WHERE 1=1
     `;
     const params = [];
@@ -381,10 +381,10 @@ app.put('/api/artworks/:id', async (req, res) => {
 
     const updated = await queryOne(
       `SELECT a.art_id, a.artist_id, a.title, a.type, a.description, a.media_url, a.react_count, a.created_at,
-              u.name as artist_name, u.username as artist_username, ar.bio as artist_bio
+              u.name as artist_name, u.username as artist_username, COALESCE(ar.bio, '') as artist_bio
        FROM Artworks a
-       JOIN Artists ar ON a.artist_id = ar.artist_id
        JOIN Users u ON a.artist_id = u.user_id
+       LEFT JOIN Artists ar ON a.artist_id = ar.artist_id
        WHERE a.art_id = ?`,
       [artId]
     );
@@ -416,7 +416,6 @@ app.delete('/api/artworks/:id', async (req, res) => {
     }
 
     // Cascade delete linked entities
-    await run(`DELETE FROM ArtworkReactions WHERE art_id = ?`, [artId]);
     await run(`DELETE FROM ArtworkComments WHERE art_id = ?`, [artId]);
     await run(`DELETE FROM ChallengeSubmissions WHERE art_id = ?`, [artId]);
     await run(`DELETE FROM Artworks WHERE art_id = ?`, [artId]);
@@ -427,22 +426,12 @@ app.delete('/api/artworks/:id', async (req, res) => {
   }
 });
 
-// Like / React to Artwork
+// Like / React to Artwork (Directly updates react_count on Artworks table)
 app.post('/api/artworks/:id/react', async (req, res) => {
   try {
     const artId = req.params.id;
-    const { user_id, reaction_type = 'like' } = req.body;
-
-    const existing = await queryOne(`SELECT * FROM ArtworkReactions WHERE user_id = ? AND art_id = ?`, [user_id, artId]);
-    if (existing) {
-      await run(`DELETE FROM ArtworkReactions WHERE user_id = ? AND art_id = ?`, [user_id, artId]);
-      await run(`UPDATE Artworks SET react_count = GREATEST(0, react_count - 1) WHERE art_id = ?`, [artId]);
-      return res.json({ reacted: false });
-    } else {
-      await run(`INSERT INTO ArtworkReactions (user_id, art_id, reaction_type) VALUES (?, ?, ?)`, [user_id, artId, reaction_type]);
-      await run(`UPDATE Artworks SET react_count = react_count + 1 WHERE art_id = ?`, [artId]);
-      return res.json({ reacted: true });
-    }
+    await run(`UPDATE Artworks SET react_count = react_count + 1 WHERE art_id = ?`, [artId]);
+    res.json({ reacted: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -496,8 +485,8 @@ app.get('/api/courses', async (req, res) => {
              (SELECT COUNT(*) FROM CourseContent cc WHERE cc.course_id = c.course_id) as lesson_count,
              (SELECT COUNT(*) FROM CourseEnrollments ce WHERE ce.course_id = c.course_id) as student_count
       FROM Courses c
-      JOIN Artists ar ON c.instructor_id = ar.artist_id
       JOIN Users u ON c.instructor_id = u.user_id
+      LEFT JOIN Artists ar ON c.instructor_id = ar.artist_id
       WHERE 1=1
     `;
     const params = [];
@@ -522,10 +511,10 @@ app.get('/api/courses/:id', async (req, res) => {
   try {
     const courseId = req.params.id;
     const course = await queryOne(
-      `SELECT c.*, u.name as instructor_name, u.username as instructor_username, ar.bio as instructor_bio
+      `SELECT c.*, u.name as instructor_name, u.username as instructor_username, COALESCE(ar.bio, '') as instructor_bio
        FROM Courses c
-       JOIN Artists ar ON c.instructor_id = ar.artist_id
        JOIN Users u ON c.instructor_id = u.user_id
+       LEFT JOIN Artists ar ON c.instructor_id = ar.artist_id
        WHERE c.course_id = ?`,
       [courseId]
     );
@@ -690,12 +679,10 @@ app.get('/api/challenges', async (req, res) => {
   }
 });
 
-// Get Contest Details & Masonry Submissions
-app.get('/api/challenges/:id/submissions', async (req, res) => {
+// Helper handler for challenge submissions
+const getChallengeSubmissionsHandler = async (req, res) => {
   try {
     const challengeId = req.params.id;
-    const { userId, user_id } = req.query;
-    const activeUserId = userId || user_id;
 
     const challenge = await queryOne(`SELECT * FROM Challenges WHERE challenge_id = ?`, [challengeId]);
     if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
@@ -703,39 +690,48 @@ app.get('/api/challenges/:id/submissions', async (req, res) => {
     const submissions = await queryAll(
       `SELECT cs.submission_id, cs.challenge_id, cs.art_id, cs.artist_id, cs.vote_count, cs.rank, cs.submitted_at,
               a.title as artwork_title, a.type as artwork_type, a.description as artwork_desc, a.media_url,
-              u.name as artist_name, u.username as artist_username, ar.bio as artist_bio
+              u.name as artist_name, u.username as artist_username, COALESCE(ar.bio, '') as artist_bio
        FROM ChallengeSubmissions cs
        JOIN Artworks a ON cs.art_id = a.art_id
-       JOIN Artists ar ON cs.artist_id = ar.artist_id
-       JOIN Users u ON cs.artist_id = u.user_id
+       JOIN Users u ON a.artist_id = u.user_id
+       LEFT JOIN Artists ar ON a.artist_id = ar.artist_id
        WHERE cs.challenge_id = ?
        ORDER BY cs.vote_count DESC, cs.submitted_at ASC`,
       [challengeId]
     );
 
-    let user_votes = [];
-    if (activeUserId) {
-      const voteRows = await queryAll(
-        `SELECT cv.submission_id 
-         FROM ChallengeVotes cv 
-         JOIN ChallengeSubmissions cs ON cv.submission_id = cs.submission_id 
-         WHERE cs.challenge_id = ? AND cv.user_id = ?`,
-        [challengeId, activeUserId]
-      );
-      user_votes = voteRows.map(r => r.submission_id);
-    }
-
-    res.json({ challenge, submissions, user_votes });
+    res.json({ challenge, submissions, user_votes: [] });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-});
+};
+
+// Get Contest Details & Submissions (both routes supported)
+app.get('/api/challenges/:id/submissions', getChallengeSubmissionsHandler);
+app.get('/api/challenges/:id', getChallengeSubmissionsHandler);
 
 // Submit Artwork Entry to Contest
 app.post('/api/challenges/:id/submit', async (req, res) => {
   try {
     const challengeId = req.params.id;
     const { art_id, artist_id } = req.body;
+
+    if (!art_id) {
+      return res.status(400).json({ error: 'Please select an artwork to submit' });
+    }
+
+    const artwork = await queryOne(`SELECT * FROM Artworks WHERE art_id = ?`, [art_id]);
+    if (!artwork) {
+      return res.status(404).json({ error: 'Artwork not found' });
+    }
+
+    const submitterArtistId = artist_id || artwork.artist_id;
+
+    // Ensure artist record exists in Artists table to avoid FK constraint errors
+    const artist = await queryOne(`SELECT artist_id FROM Artists WHERE artist_id = ?`, [submitterArtistId]);
+    if (!artist) {
+      await run(`INSERT INTO Artists (artist_id, bio, portfolio_links, availability_status) VALUES (?, 'Visual Creator', '', 'Available')`, [submitterArtistId]);
+    }
 
     const existing = await queryOne(`SELECT submission_id FROM ChallengeSubmissions WHERE challenge_id = ? AND art_id = ?`, [challengeId, art_id]);
     if (existing) {
@@ -744,7 +740,7 @@ app.post('/api/challenges/:id/submit', async (req, res) => {
 
     const result = await run(
       `INSERT INTO ChallengeSubmissions (challenge_id, art_id, artist_id, vote_count, rank) VALUES (?, ?, ?, 0, NULL)`,
-      [challengeId, art_id, artist_id]
+      [challengeId, art_id, submitterArtistId]
     );
 
     res.status(201).json({ submission_id: result.lastID, message: 'Artwork entered into contest successfully' });
@@ -769,19 +765,12 @@ app.post('/api/challenges/submissions/:id/vote', async (req, res) => {
       return res.status(404).json({ error: 'Contest submission not found.' });
     }
 
-    // Rule 1: Contestants cannot vote for their own submissions
+    // Rule: Contestants cannot vote for their own submissions
     if (Number(sub.artist_id) === Number(voterId)) {
       return res.status(400).json({ error: 'Contestants cannot vote for their own submissions.' });
     }
 
-    // Rule 2: No one can vote more than once per submission
-    const existingVote = await queryOne(`SELECT * FROM ChallengeVotes WHERE submission_id = ? AND user_id = ?`, [submissionId, voterId]);
-    if (existingVote) {
-      return res.status(400).json({ error: 'You have already voted for this submission.' });
-    }
-
-    // Record the vote
-    await run(`INSERT INTO ChallengeVotes (submission_id, user_id) VALUES (?, ?)`, [submissionId, voterId]);
+    // Increment vote count on ChallengeSubmissions
     await run(`UPDATE ChallengeSubmissions SET vote_count = vote_count + 1 WHERE submission_id = ?`, [submissionId]);
 
     res.json({ success: true, message: 'Vote recorded successfully!' });

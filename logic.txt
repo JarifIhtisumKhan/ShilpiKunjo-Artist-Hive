@@ -122,12 +122,12 @@ SQL Query   :
   LEFT JOIN Admins a ON u.user_id = a.admin_id
   WHERE u.user_id = ?;
 
-Feature 2.4: Reaction / Like Duplicate Check
----------------------------------------------
-Description : Verifies if a user has already liked/reacted to a specific artwork.
-Location    : server/index.js (Line ~392)
+Feature 2.4: Artwork React / Like Count Update
+----------------------------------------------
+Description : Increments total reaction/like count directly on the artwork record.
+Location    : server/index.js (Line ~430)
 SQL Query   :
-  SELECT * FROM ArtworkReactions WHERE user_id = ? AND art_id = ?;
+  UPDATE Artworks SET react_count = react_count + 1 WHERE art_id = ?;
 
 Feature 2.5: Artwork Comments List
 ----------------------------------
@@ -232,53 +232,37 @@ SQL Query   :
 Feature 5.2: Contest Submissions Leaderboard
 ---------------------------------------------
 Description : Fetches all artwork entries for a contest sorted by vote count.
-Location    : server/index.js (Line ~703)
+Location    : server/index.js (Line ~688)
 SQL Query   :
   SELECT cs.submission_id, cs.challenge_id, cs.art_id, cs.artist_id, cs.vote_count,
          cs.rank, cs.submitted_at, a.title as artwork_title, a.type as artwork_type,
          a.description as artwork_desc, a.media_url, u.name as artist_name,
-         u.username as artist_username, ar.bio as artist_bio
+         u.username as artist_username, COALESCE(ar.bio, '') as artist_bio
   FROM ChallengeSubmissions cs
   JOIN Artworks a ON cs.art_id = a.art_id
-  JOIN Artists ar ON cs.artist_id = ar.artist_id
-  JOIN Users u ON cs.artist_id = u.user_id
+  JOIN Users u ON a.artist_id = u.user_id
+  LEFT JOIN Artists ar ON a.artist_id = ar.artist_id
   WHERE cs.challenge_id = ?
   ORDER BY cs.vote_count DESC, cs.submitted_at ASC;
 
-Feature 5.3: User Vote History Tracking (Single-Vote Rule)
------------------------------------------------------------
-Description : Retrieves all submission IDs that the logged-in user has already voted for
-              in a specific contest to prevent duplicate voting.
-Location    : server/index.js (Line ~714)
-SQL Query   :
-  SELECT cv.submission_id
-  FROM ChallengeVotes cv
-  JOIN ChallengeSubmissions cs ON cv.submission_id = cs.submission_id
-  WHERE cs.challenge_id = ? AND cv.user_id = ?;
-
-Feature 5.4: Contest Submission Duplicate Check
+Feature 5.3: Contest Submission Duplicate Check
 ------------------------------------------------
 Description : Checks if an artwork has already been entered into a contest.
-Location    : server/index.js (Line ~750)
+Location    : server/index.js (Line ~729)
 SQL Query   :
   SELECT submission_id FROM ChallengeSubmissions WHERE challenge_id = ? AND art_id = ?;
 
-Feature 5.5: Self-Voting Prohibition & Duplicate Vote Prevention
------------------------------------------------------------------
+Feature 5.4: Self-Voting Prohibition & Vote Count Increment
+------------------------------------------------------------
 Description : Checks submission details to block contestants from voting for themselves,
-              and checks ChallengeVotes to prevent multiple votes by the same user.
-Location    : server/index.js (Lines ~765, ~777, ~783)
+              and increments the vote count on the contest submission record.
+Location    : server/index.js (Lines ~756, ~768)
 SQL Queries :
   -- Fetch Submission Author Info:
   SELECT * FROM ChallengeSubmissions WHERE submission_id = ?;
-
-  -- Check Previous User Vote:
-  SELECT * FROM ChallengeVotes WHERE submission_id = ? AND user_id = ?;
-
-  -- Record Vote:
-  INSERT INTO ChallengeVotes (submission_id, user_id) VALUES (?, ?);
 
   -- Increment Total Vote Count:
   UPDATE ChallengeSubmissions SET vote_count = vote_count + 1 WHERE submission_id = ?;
 
 ================================================================================
+

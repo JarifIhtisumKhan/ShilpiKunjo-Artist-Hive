@@ -98,35 +98,41 @@ export default function LoginModal({ onLoginSuccess }) {
   };
 
   return (
-    <div className="min-h-[88vh] flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-[#c6ae82] rounded-3xl p-8 border border-[#ab946a] shadow-2xl relative overflow-hidden">
-        {/* Glow decorative background */}
-        <div className="absolute -top-12 -right-12 w-56 h-56 bg-[#aca04d]/10 rounded-full blur-3xl -z-10"></div>
-
-        {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#aca04d] via-[#748729] to-[#315812] p-0.5 shadow-xl shadow-[#315812]/20 mx-auto mb-3 hover:scale-105 transition-transform duration-300">
-            <div className="w-full h-full bg-[#F3E3C5] rounded-[14px] flex items-center justify-center">
-              <Palette className="w-7 h-7 text-[#315812]" />
+    <div className="w-full flex items-center justify-center p-4">
+      <div className="w-full max-w-lg bg-[#c6ae82]/95 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-[#ab946a] shadow-2xl relative overflow-hidden">
+        {/* Top Mini Illustration Banner */}
+        <div className="relative rounded-2xl overflow-hidden mb-6 h-32 w-full border border-stone-600 shadow-md">
+          <img
+            src="/koi_pond_bg.jpg"
+            alt="Zen Koi Pond"
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent flex items-end p-3.5">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-stone-800/90 border border-stone-600 p-1 flex items-center justify-center shadow-lg">
+                <Palette className="w-5 h-5 text-amber-300" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-white tracking-tight leading-none drop-shadow">
+                  ShilpiKunjo
+                </h2>
+                <span className="text-[10px] text-stone-300 font-medium">Artist Hive Platform</span>
+              </div>
             </div>
           </div>
-
-          <h2 className="text-3xl font-extrabold tracking-tight text-gray-950">
-            ShilpiKunjo
-          </h2>
         </div>
 
         {/* Form Error Banner */}
         {error && (
-          <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-700 text-xs text-center font-medium animate-fadeIn">
+          <div className="mb-4 p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-800 text-xs text-center font-bold animate-fadeIn">
             {error}
           </div>
         )}
 
         {/* Segmented Sliding Tab Control */}
-        <div className="relative flex bg-[#b8a074] p-1.5 rounded-2xl border border-[#9d865c] mb-6 text-xs font-semibold">
+        <div className="relative flex bg-stone-800 p-1.5 rounded-2xl border border-stone-600 mb-6 text-xs font-semibold shadow-inner">
           <div
-            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-r from-[#aca04d] to-[#315812] rounded-xl transition-all duration-300 ease-out shadow-md ${
+            className={`absolute top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-gradient-to-b from-stone-600 to-stone-900 rounded-xl transition-all duration-300 ease-out border border-stone-500/50 shadow-md ${
               mode === 'register' ? 'left-[calc(50%+3px)]' : 'left-1.5'
             }`}
           />
@@ -134,7 +140,7 @@ export default function LoginModal({ onLoginSuccess }) {
             type="button"
             onClick={() => setMode('login')}
             className={`relative z-10 flex-1 py-2.5 text-center transition-colors duration-200 font-bold ${
-              mode === 'login' ? 'text-white' : 'text-gray-800 hover:text-gray-950'
+              mode === 'login' ? 'text-white drop-shadow' : 'text-stone-400 hover:text-stone-200'
             }`}
           >
             Sign In
@@ -143,7 +149,7 @@ export default function LoginModal({ onLoginSuccess }) {
             type="button"
             onClick={() => setMode('register')}
             className={`relative z-10 flex-1 py-2.5 text-center transition-colors duration-200 font-bold ${
-              mode === 'register' ? 'text-white' : 'text-gray-800 hover:text-gray-950'
+              mode === 'register' ? 'text-white drop-shadow' : 'text-stone-400 hover:text-stone-200'
             }`}
           >
             Create Account
@@ -168,25 +174,26 @@ export default function LoginModal({ onLoginSuccess }) {
               onChange={(e) => setPassword(e.target.value)}
             />
 
+            {/* Stone-Colored Primary Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-[#aca04d] via-[#748729] to-[#315812] text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-[#315812]/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2"
+              className="btn-stone w-full py-3.5 text-stone-100 font-bold text-xs rounded-2xl shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-2"
             >
               {loading ? 'Authenticating...' : 'Sign In'}
               <ArrowRight className="w-4 h-4" />
             </button>
 
-            {/* Google-style Demo Fill Credentials */}
+            {/* Demo Fill Credentials (Stone Button Badges) */}
             <div className="pt-3 border-t border-[#ab946a] mt-4">
-              <p className="text-[11px] text-gray-800 mb-2 font-medium text-center">
-                Demo Credentials (Password: <code className="text-[#315812] font-mono font-bold">password123</code>)
+              <p className="text-[11px] text-gray-800 mb-2 font-bold text-center">
+                Demo Credentials (Password: <code className="text-stone-800 font-mono font-bold bg-stone-300 px-1.5 py-0.5 rounded">password123</code>)
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => handleFillDemo('jarif', 'password123')}
-                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
+                  className="btn-stone-secondary flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Jarif
@@ -194,7 +201,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => handleFillDemo('fairuz', 'password123')}
-                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
+                  className="btn-stone-secondary flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Fairuz
@@ -202,7 +209,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => handleFillDemo('rudila', 'password123')}
-                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
+                  className="btn-stone-secondary flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Rudila
@@ -210,7 +217,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => handleFillDemo('rubab_sazda', 'password123')}
-                  className="flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-[#315812] hover:bg-[#aca04d]/20 transition-all"
+                  className="btn-stone-secondary flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
                   Rubab
@@ -218,7 +225,7 @@ export default function LoginModal({ onLoginSuccess }) {
                 <button
                   type="button"
                   onClick={() => handleFillDemo('admin', 'password123')}
-                  className="col-span-2 flex items-center justify-center gap-1 px-3 py-1.5 bg-[#b8a074] border border-[#9d865c] rounded-xl text-xs font-bold text-rose-800 hover:bg-rose-500/10 transition-all"
+                  className="btn-stone col-span-2 flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-amber-200"
                 >
                   <Shield className="w-3.5 h-3.5" />
                   Admin (@admin)
@@ -262,10 +269,11 @@ export default function LoginModal({ onLoginSuccess }) {
               onChange={(e) => setRegForm({ ...regForm, password: e.target.value })}
             />
 
+            {/* Stone-Colored Register Button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-gradient-to-r from-[#aca04d] via-[#748729] to-[#315812] text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-[#315812]/20 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4"
+              className="btn-stone w-full py-3.5 text-stone-100 font-bold text-xs rounded-2xl shadow-xl hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
               <ArrowRight className="w-4 h-4" />

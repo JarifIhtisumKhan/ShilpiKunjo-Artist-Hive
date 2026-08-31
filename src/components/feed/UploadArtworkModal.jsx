@@ -155,16 +155,16 @@ export default function UploadArtworkModal({ onClose, currentUser, onUploadSucce
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#b8a074] text-gray-800 hover:bg-[#a89064]"
+              className="px-4 py-2 rounded-xl text-xs font-bold bg-stone-700/40 text-stone-900 hover:bg-stone-700/60 border border-stone-600/40"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 disabled:opacity-50 flex items-center gap-1.5 shadow-md"
+              className="btn-stone px-5 py-2 rounded-xl text-xs font-bold text-stone-100 disabled:opacity-50 flex items-center gap-1.5 shadow-md"
             >
-              <Upload className="w-3.5 h-3.5" />
+              <Upload className="w-3.5 h-3.5 text-amber-300" />
               <span>{loading ? 'Publishing...' : 'Publish to Feed'}</span>
             </button>
           </div>

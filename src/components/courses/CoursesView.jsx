@@ -63,9 +63,9 @@ export default function CoursesView({ currentUser }) {
         {/* Back Button */}
         <button
           onClick={() => setSelectedCourse(null)}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors text-xs font-semibold"
+          className="btn-stone flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-md transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-amber-300" />
           <span>Back to Course Catalog</span>
         </button>
 
@@ -83,9 +83,9 @@ export default function CoursesView({ currentUser }) {
             
             <button
               onClick={handleEnroll}
-              className="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 shadow-md shadow-[#315812]/20 flex items-center gap-1.5"
+              className="btn-stone px-5 py-2.5 rounded-xl text-xs font-bold text-stone-100 shadow-md flex items-center gap-1.5"
             >
-              <CheckCircle2 className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4 text-amber-300" />
               <span>Enroll In Masterclass</span>
             </button>
           </div>
@@ -193,8 +193,8 @@ export default function CoursesView({ currentUser }) {
             onClick={() => setActiveDifficulty(diff)}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeDifficulty === diff
-                ? 'bg-amber-500 text-gray-950 shadow-md shadow-amber-500/20'
-                : 'bg-gray-900/80 text-gray-400 hover:text-white border border-gray-800/80'
+                ? 'btn-stone text-stone-100 shadow-md'
+                : 'bg-stone-700/30 text-stone-900 hover:text-stone-950 border border-stone-600/40 hover:bg-stone-700/50'
             }`}
           >
             {diff}

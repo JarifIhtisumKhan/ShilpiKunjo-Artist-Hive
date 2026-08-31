@@ -141,9 +141,9 @@ export default function FreelanceView({ currentUser }) {
 
           <button
             onClick={() => setIsPostModalOpen(true)}
-            className="w-full sm:w-auto px-4 py-2 rounded-2xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 shadow-md shadow-[#315812]/20 flex items-center justify-center gap-1.5"
+            className="btn-stone w-full sm:w-auto px-4 py-2 rounded-2xl text-xs font-bold text-stone-100 shadow-md flex items-center justify-center gap-1.5"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-amber-300" />
             <span>Post Contract Brief</span>
           </button>
         </div>
@@ -151,8 +151,8 @@ export default function FreelanceView({ currentUser }) {
 
       {/* Status Filters (Deterministic) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <div className="flex items-center gap-1.5 text-xs text-gray-700 pr-2 border-r border-[#ab946a]">
-          <Filter className="w-3.5 h-3.5 text-[#315812]" />
+        <div className="flex items-center gap-1.5 text-xs text-gray-800 font-bold pr-2 border-r border-[#ab946a]">
+          <Filter className="w-3.5 h-3.5 text-stone-700" />
           <span>Status:</span>
         </div>
         {['All', 'Requested', 'Accepted', 'In Progress', 'Review', 'Completed'].map(status => (
@@ -161,8 +161,8 @@ export default function FreelanceView({ currentUser }) {
             onClick={() => setActiveStatus(status)}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeStatus === status
-                ? 'bg-gradient-to-r from-[#aca04d] to-[#315812] text-white shadow-md shadow-[#315812]/20'
-                : 'bg-[#d8c5a0] text-gray-800 hover:text-gray-950 border border-[#bfa980] hover:bg-[#aca04d]/30'
+                ? 'btn-stone text-stone-100 shadow-md'
+                : 'bg-stone-700/30 text-stone-900 hover:text-stone-950 border border-stone-600/40 hover:bg-stone-700/50'
             }`}
           >
             {status}

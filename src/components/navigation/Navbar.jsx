@@ -33,7 +33,7 @@ export default function Navbar({ activeTab, onTabChange, currentUser, onLogout, 
           </div>
 
           {/* Center Navigation Tabs */}
-          <nav className="flex items-center gap-1 sm:gap-2 bg-[#E5D4B4]/80 p-1 rounded-2xl border border-amber-900/20 shadow-inner">
+          <nav className="flex items-center gap-1 sm:gap-2 bg-stone-800/90 p-1 rounded-2xl border border-stone-600 shadow-inner">
             {navTabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -41,16 +41,16 @@ export default function Navbar({ activeTab, onTabChange, currentUser, onLogout, 
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
-                  className={`relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-300 ${
+                  className={`relative flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-1.5 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-200 ${
                     isActive
-                      ? 'bg-gradient-to-r from-[#aca04d] to-[#315812] text-white shadow-md shadow-[#315812]/20 font-bold'
-                      : 'text-gray-700 hover:text-gray-950 hover:bg-[#315812]/10'
+                      ? 'btn-stone text-stone-100 shadow-md font-bold'
+                      : 'text-stone-300 hover:text-white hover:bg-stone-700/60'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-amber-300' : 'text-stone-400'}`} />
                   <span className="hidden md:inline">{tab.label}</span>
                   {tab.badge && !isActive && (
-                    <span className="hidden lg:inline-block text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30">
+                    <span className="hidden lg:inline-block text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-stone-700 text-stone-200 border border-stone-500">
                       {tab.badge}
                     </span>
                   )}
@@ -64,9 +64,9 @@ export default function Navbar({ activeTab, onTabChange, currentUser, onLogout, 
             {currentUser?.is_artist && (
               <button
                 onClick={onOpenUploadModal}
-                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#E5D4B4] border border-[#315812]/40 text-[#315812] hover:bg-[#aca04d]/20 transition-colors shadow-xs"
+                className="btn-stone hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-100 shadow-md"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#315812]" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span>Upload Art</span>
               </button>
             )}

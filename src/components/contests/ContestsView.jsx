@@ -80,8 +80,19 @@ export default function ContestsView({ currentUser }) {
     try {
       const res = await fetch(`/api/artworks?artist_id=${currentUser.user_id}`);
       const data = await res.json();
-      setUserArtworks(Array.isArray(data) ? data : []);
-      if (data.length > 0) setSelectedArtId(data[0].art_id);
+      const allUserArtworks = Array.isArray(data) ? data : [];
+      
+      // Filter out artworks that are already submitted to this challenge
+      const submittedArtIds = new Set(submissions.map(s => Number(s.art_id)));
+      const available = allUserArtworks.filter(a => !submittedArtIds.has(Number(a.art_id)));
+
+      setUserArtworks(available);
+      if (available.length > 0) {
+        setSelectedArtId(String(available[0].art_id));
+      } else {
+        setSelectedArtId('');
+      }
+      setSubmitError('');
       setIsSubmitModalOpen(true);
     } catch (err) {
       console.error('Error loading user art:', err);
@@ -106,7 +117,8 @@ export default function ContestsView({ currentUser }) {
       if (!res.ok) throw new Error(data.error || 'Failed to submit entry');
 
       setIsSubmitModalOpen(false);
-      openChallengeDetails(selectedChallenge);
+      await openChallengeDetails(selectedChallenge);
+      fetchChallenges();
     } catch (err) {
       setSubmitError(err.message);
     }
@@ -120,9 +132,9 @@ export default function ContestsView({ currentUser }) {
         {/* Back Button */}
         <button
           onClick={() => setSelectedChallenge(null)}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors text-xs font-semibold"
+          className="btn-stone flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-md transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-amber-300" />
           <span>Back to All Contests</span>
         </button>
 
@@ -159,12 +171,12 @@ export default function ContestsView({ currentUser }) {
                 <span>{submissions.length} Submissions entered</span>
               </div>
 
-              {selectedChallenge.status === 'Active' && currentUser?.is_artist && (
+              {selectedChallenge.status === 'Active' && currentUser && (
                 <button
                   onClick={openSubmitModal}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95 shadow-lg shadow-[#315812]/20 flex items-center gap-1.5"
+                  className="btn-stone px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-lg flex items-center gap-1.5"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-amber-300" />
                   <span>Submit Artwork Entry</span>
                 </button>
               )}
@@ -236,20 +248,20 @@ export default function ContestsView({ currentUser }) {
 
                     {selectedChallenge.status === 'Active' && (
                       Number(sub.artist_id) === Number(currentUser?.user_id) ? (
-                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#b8a074] text-gray-800 border border-[#9d865c]">
+                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-stone-700/40 text-stone-900 border border-stone-600/40">
                           Your Entry
                         </span>
                       ) : userVotes.includes(sub.submission_id) ? (
                         <button
                           disabled
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-600/20 text-emerald-800 border border-emerald-500/40 opacity-90 cursor-default"
+                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-stone-800 text-stone-300 border border-stone-600 opacity-90 cursor-default"
                         >
                           Voted ✓
                         </button>
                       ) : (
                         <button
                           onClick={(e) => handleVote(e, sub)}
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#aca04d]/20 text-[#315812] hover:bg-[#aca04d] hover:text-white transition-colors border border-[#315812]/30"
+                          className="btn-stone px-3 py-1 rounded-lg text-[11px] font-bold text-stone-100 shadow-sm"
                         >
                           + Vote
                         </button>
@@ -276,7 +288,18 @@ export default function ContestsView({ currentUser }) {
               )}
 
               {userArtworks.length === 0 ? (
-                <p className="text-xs text-[#315812] italic mb-4">You have not published any artworks yet. Publish an artwork on the Feed first!</p>
+                <div className="space-y-3 mb-4">
+                  <p className="text-xs text-[#315812] italic">
+                    No eligible artworks available to submit. Either all your published artworks are already entered in this contest, or you have not published an artwork yet.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setIsSubmitModalOpen(false)}
+                    className="w-full py-2 rounded-xl text-xs bg-[#b8a074] text-gray-900 font-bold hover:bg-[#a89064]"
+                  >
+                    Close
+                  </button>
+                </div>
               ) : (
                 <form onSubmit={handleSubmitEntry} className="space-y-4">
                   <div>
@@ -296,13 +319,13 @@ export default function ContestsView({ currentUser }) {
                     <button
                       type="button"
                       onClick={() => setIsSubmitModalOpen(false)}
-                      className="px-4 py-2 rounded-xl text-xs bg-[#b8a074] text-gray-800 hover:bg-[#a89064]"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-stone-700/40 text-stone-900 hover:bg-stone-700/60 border border-stone-600/40"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[#aca04d] to-[#315812] text-white hover:opacity-95"
+                      className="btn-stone px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-md"
                     >
                       Confirm Submission
                     </button>
