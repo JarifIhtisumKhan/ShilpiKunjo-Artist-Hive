@@ -236,17 +236,27 @@ app.put('/api/users/:id/profile', async (req, res) => {
 // Get Feed Artworks
 app.get('/api/artworks', async (req, res) => {
   try {
-    const { type, search, artist_id } = req.query;
+    const { type, search, artist_id, user_id } = req.query;
     let sql = `
       SELECT a.art_id, a.artist_id, a.title, a.type, a.description, a.media_url, a.react_count, a.created_at,
              u.name as artist_name, u.username as artist_username, COALESCE(ar.bio, '') as artist_bio,
              (SELECT COUNT(*) FROM ArtworkComments ac WHERE ac.art_id = a.art_id) as comments_count
+    `;
+    const params = [];
+
+    if (user_id) {
+      sql += `, CASE WHEN EXISTS(SELECT 1 FROM ArtworkReactions arx WHERE arx.art_id = a.art_id AND arx.user_id = ?) THEN 1 ELSE 0 END as user_reacted`;
+      params.push(user_id);
+    } else {
+      sql += `, 0 as user_reacted`;
+    }
+
+    sql += `
       FROM Artworks a
       JOIN Users u ON a.artist_id = u.user_id
       LEFT JOIN Artists ar ON a.artist_id = ar.artist_id
       WHERE 1=1
     `;
-    const params = [];
 
     if (type && type !== 'All') {
       sql += ` AND a.type = ?`;
@@ -417,6 +427,7 @@ app.delete('/api/artworks/:id', async (req, res) => {
 
     // Cascade delete linked entities
     await run(`DELETE FROM ArtworkComments WHERE art_id = ?`, [artId]);
+    await run(`DELETE FROM ArtworkReactions WHERE art_id = ?`, [artId]);
     await run(`DELETE FROM ChallengeSubmissions WHERE art_id = ?`, [artId]);
     await run(`DELETE FROM Artworks WHERE art_id = ?`, [artId]);
 
@@ -426,12 +437,41 @@ app.delete('/api/artworks/:id', async (req, res) => {
   }
 });
 
-// Like / React to Artwork (Directly updates react_count on Artworks table)
+// Like / React to Artwork (Enforces max 1 vote/reaction per user with toggle capability)
 app.post('/api/artworks/:id/react', async (req, res) => {
   try {
     const artId = req.params.id;
-    await run(`UPDATE Artworks SET react_count = react_count + 1 WHERE art_id = ?`, [artId]);
-    res.json({ reacted: true });
+    const { user_id, userId } = req.body;
+    const voterId = user_id || userId;
+
+    if (!voterId) {
+      return res.status(401).json({ error: 'You must be logged in to like or react to artwork.' });
+    }
+
+    const artwork = await queryOne(`SELECT * FROM Artworks WHERE art_id = ?`, [artId]);
+    if (!artwork) {
+      return res.status(404).json({ error: 'Artwork not found.' });
+    }
+
+    // Check if user has already reacted
+    const existing = await queryOne(
+      `SELECT * FROM ArtworkReactions WHERE art_id = ? AND user_id = ?`,
+      [artId, voterId]
+    );
+
+    if (existing) {
+      // Toggle reaction off
+      await run(`DELETE FROM ArtworkReactions WHERE art_id = ? AND user_id = ?`, [artId, voterId]);
+      await run(`UPDATE Artworks SET react_count = CASE WHEN react_count > 0 THEN react_count - 1 ELSE 0 END WHERE art_id = ?`, [artId]);
+      const updated = await queryOne(`SELECT react_count FROM Artworks WHERE art_id = ?`, [artId]);
+      return res.json({ reacted: false, react_count: updated.react_count, message: 'Reaction removed' });
+    } else {
+      // Record new unique reaction
+      await run(`INSERT INTO ArtworkReactions (art_id, user_id) VALUES (?, ?)`, [artId, voterId]);
+      await run(`UPDATE Artworks SET react_count = react_count + 1 WHERE art_id = ?`, [artId]);
+      const updated = await queryOne(`SELECT react_count FROM Artworks WHERE art_id = ?`, [artId]);
+      return res.json({ reacted: true, react_count: updated.react_count, message: 'Reaction recorded' });
+    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -651,6 +691,13 @@ app.patch('/api/commissions/:id/status', async (req, res) => {
   }
 });
 
+// Helper to verify admin privileges
+const verifyAdmin = async (userId) => {
+  if (!userId) return false;
+  const admin = await queryOne(`SELECT admin_id FROM Admins WHERE admin_id = ?`, [userId]);
+  return !!admin;
+};
+
 // ----------------------------------------------------
 // 5. CHALLENGES & CONTEST SUBMISSIONS (WITH MASONRY GALLERY)
 // ----------------------------------------------------
@@ -679,10 +726,138 @@ app.get('/api/challenges', async (req, res) => {
   }
 });
 
+// Create New Contest (Admin Only)
+app.post('/api/challenges', async (req, res) => {
+  try {
+    const { user_id, creator_id, title, description, start_date, deadline, banner_url, participation_limit } = req.body;
+    const adminId = user_id || creator_id;
+
+    const isAdmin = await verifyAdmin(adminId);
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Permission denied: Only administrators can create contests.' });
+    }
+
+    if (!title || !description || !deadline) {
+      return res.status(400).json({ error: 'Missing required contest fields (title, description, deadline).' });
+    }
+
+    const sanitizedBanner = banner_url ? formatDriveImageUrl(banner_url) : '';
+    const startDate = start_date || new Date().toISOString().split('T')[0];
+
+    const result = await run(
+      `INSERT INTO Challenges (creator_id, title, description, start_date, deadline, banner_url, participation_limit, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'Active')`,
+      [adminId, title, description, startDate, deadline, sanitizedBanner, participation_limit || null]
+    );
+
+    res.status(201).json({
+      challenge_id: result.lastID,
+      message: 'Contest created successfully by administrator'
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Terminate or Update Status of Contest (Admin Only)
+app.patch('/api/challenges/:id/status', async (req, res) => {
+  try {
+    const challengeId = req.params.id;
+    const { user_id, userId, status } = req.body;
+    const requesterId = user_id || userId;
+
+    const isAdmin = await verifyAdmin(requesterId);
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Permission denied: Only administrators can terminate or modify contest status.' });
+    }
+
+    const challenge = await queryOne(`SELECT * FROM Challenges WHERE challenge_id = ?`, [challengeId]);
+    if (!challenge) {
+      return res.status(404).json({ error: 'Challenge not found' });
+    }
+
+    const newStatus = status || 'Completed';
+
+    await run(`UPDATE Challenges SET status = ? WHERE challenge_id = ?`, [newStatus, challengeId]);
+
+    // If ending or completing the contest, calculate and freeze the official rank placements
+    if (newStatus === 'Completed' || newStatus === 'Terminated') {
+      const submissions = await queryAll(
+        `SELECT submission_id FROM ChallengeSubmissions WHERE challenge_id = ? ORDER BY vote_count DESC, submitted_at ASC`,
+        [challengeId]
+      );
+      for (let i = 0; i < submissions.length; i++) {
+        await run(`UPDATE ChallengeSubmissions SET rank = ? WHERE submission_id = ?`, [i + 1, submissions[i].submission_id]);
+      }
+    }
+
+    res.json({ success: true, status: newStatus, message: `Contest successfully set to ${newStatus}.` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Terminate Contest Alias (Admin Only)
+app.post('/api/challenges/:id/terminate', async (req, res) => {
+  try {
+    const challengeId = req.params.id;
+    const { user_id, userId } = req.body;
+    const requesterId = user_id || userId;
+
+    const isAdmin = await verifyAdmin(requesterId);
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Permission denied: Only administrators can terminate contests.' });
+    }
+
+    const challenge = await queryOne(`SELECT * FROM Challenges WHERE challenge_id = ?`, [challengeId]);
+    if (!challenge) {
+      return res.status(404).json({ error: 'Challenge not found' });
+    }
+
+    await run(`UPDATE Challenges SET status = 'Completed' WHERE challenge_id = ?`, [challengeId]);
+
+    // Freeze official ranks
+    const submissions = await queryAll(
+      `SELECT submission_id FROM ChallengeSubmissions WHERE challenge_id = ? ORDER BY vote_count DESC, submitted_at ASC`,
+      [challengeId]
+    );
+    for (let i = 0; i < submissions.length; i++) {
+      await run(`UPDATE ChallengeSubmissions SET rank = ? WHERE submission_id = ?`, [i + 1, submissions[i].submission_id]);
+    }
+
+    res.json({ success: true, status: 'Completed', message: 'Contest terminated and official standings finalized.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete Contest (Admin Only)
+app.delete('/api/challenges/:id', async (req, res) => {
+  try {
+    const challengeId = req.params.id;
+    const { user_id, userId } = req.body;
+    const requesterId = req.query.user_id || user_id || userId;
+
+    const isAdmin = await verifyAdmin(requesterId);
+    if (!isAdmin) {
+      return res.status(403).json({ error: 'Permission denied: Only administrators can delete contests.' });
+    }
+
+    await run(`DELETE FROM ChallengeVotes WHERE submission_id IN (SELECT submission_id FROM ChallengeSubmissions WHERE challenge_id = ?)`, [challengeId]);
+    await run(`DELETE FROM ChallengeSubmissions WHERE challenge_id = ?`, [challengeId]);
+    await run(`DELETE FROM Challenges WHERE challenge_id = ?`, [challengeId]);
+
+    res.json({ success: true, message: 'Contest deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Helper handler for challenge submissions
 const getChallengeSubmissionsHandler = async (req, res) => {
   try {
     const challengeId = req.params.id;
+    const userId = req.query.user_id;
 
     const challenge = await queryOne(`SELECT * FROM Challenges WHERE challenge_id = ?`, [challengeId]);
     if (!challenge) return res.status(404).json({ error: 'Challenge not found' });
@@ -700,7 +875,19 @@ const getChallengeSubmissionsHandler = async (req, res) => {
       [challengeId]
     );
 
-    res.json({ challenge, submissions, user_votes: [] });
+    let userVotes = [];
+    if (userId) {
+      const voteRows = await queryAll(
+        `SELECT cv.submission_id
+         FROM ChallengeVotes cv
+         JOIN ChallengeSubmissions cs ON cv.submission_id = cs.submission_id
+         WHERE cv.user_id = ? AND cs.challenge_id = ?`,
+        [userId, challengeId]
+      );
+      userVotes = voteRows.map(r => r.submission_id);
+    }
+
+    res.json({ challenge, submissions, user_votes: userVotes });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -749,7 +936,7 @@ app.post('/api/challenges/:id/submit', async (req, res) => {
   }
 });
 
-// Vote for Contest Entry
+// Vote for Contest Entry (Enforces 1 vote per user rule)
 app.post('/api/challenges/submissions/:id/vote', async (req, res) => {
   try {
     const submissionId = req.params.id;
@@ -765,15 +952,30 @@ app.post('/api/challenges/submissions/:id/vote', async (req, res) => {
       return res.status(404).json({ error: 'Contest submission not found.' });
     }
 
-    // Rule: Contestants cannot vote for their own submissions
+    // Rule 1: Contestants cannot vote for their own submissions
     if (Number(sub.artist_id) === Number(voterId)) {
       return res.status(400).json({ error: 'Contestants cannot vote for their own submissions.' });
     }
 
+    // Rule 2: A user cannot vote more than once on the same contest entry
+    const existingVote = await queryOne(
+      `SELECT * FROM ChallengeVotes WHERE submission_id = ? AND user_id = ?`,
+      [submissionId, voterId]
+    );
+
+    if (existingVote) {
+      return res.status(400).json({ error: 'You have already voted for this contest entry. Duplicate voting is not permitted.' });
+    }
+
+    // Record vote in ChallengeVotes
+    await run(`INSERT INTO ChallengeVotes (submission_id, user_id) VALUES (?, ?)`, [submissionId, voterId]);
+
     // Increment vote count on ChallengeSubmissions
     await run(`UPDATE ChallengeSubmissions SET vote_count = vote_count + 1 WHERE submission_id = ?`, [submissionId]);
 
-    res.json({ success: true, message: 'Vote recorded successfully!' });
+    const updated = await queryOne(`SELECT vote_count FROM ChallengeSubmissions WHERE submission_id = ?`, [submissionId]);
+
+    res.json({ success: true, vote_count: updated.vote_count, message: 'Vote recorded successfully!' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

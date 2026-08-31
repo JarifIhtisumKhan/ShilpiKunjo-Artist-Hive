@@ -156,6 +156,15 @@ export async function initDb() {
         FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS ArtworkReactions (
+        art_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (art_id, user_id),
+        FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+      );
+
       CREATE TABLE IF NOT EXISTS Challenges (
         challenge_id INTEGER PRIMARY KEY AUTOINCREMENT,
         creator_id INTEGER NOT NULL,
@@ -181,6 +190,15 @@ export async function initDb() {
         FOREIGN KEY (challenge_id) REFERENCES Challenges(challenge_id) ON DELETE CASCADE,
         FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE,
         FOREIGN KEY (artist_id) REFERENCES Artists(artist_id) ON DELETE CASCADE
+      );
+
+      CREATE TABLE IF NOT EXISTS ChallengeVotes (
+        submission_id INTEGER NOT NULL,
+        user_id INTEGER NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (submission_id, user_id),
+        FOREIGN KEY (submission_id) REFERENCES ChallengeSubmissions(submission_id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
       );
 
       CREATE TABLE IF NOT EXISTS Courses (

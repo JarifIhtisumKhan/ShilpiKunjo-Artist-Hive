@@ -16,12 +16,15 @@ export default function FeedView({ currentUser }) {
 
   useEffect(() => {
     fetchArtworks();
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, currentUser]);
 
   const fetchArtworks = async () => {
     setLoading(true);
     try {
       let url = `/api/artworks?type=${encodeURIComponent(activeFilter)}`;
+      if (currentUser?.user_id) {
+        url += `&user_id=${encodeURIComponent(currentUser.user_id)}`;
+      }
       if (searchQuery.trim()) {
         url += `&search=${encodeURIComponent(searchQuery.trim())}`;
       }
@@ -37,7 +40,10 @@ export default function FeedView({ currentUser }) {
 
   const handleQuickLike = async (e, art) => {
     e.stopPropagation();
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('Please sign in to react to artworks.');
+      return;
+    }
     try {
       const res = await fetch(`/api/artworks/${art.art_id}/react`, {
         method: 'POST',
@@ -48,7 +54,11 @@ export default function FeedView({ currentUser }) {
       setArtworks(prev =>
         prev.map(a =>
           a.art_id === art.art_id
-            ? { ...a, react_count: data.reacted ? a.react_count + 1 : Math.max(0, a.react_count - 1) }
+            ? {
+                ...a,
+                react_count: data.react_count !== undefined ? data.react_count : (data.reacted ? a.react_count + 1 : Math.max(0, a.react_count - 1)),
+                user_reacted: data.reacted ? 1 : 0
+              }
             : a
         )
       );
@@ -158,9 +168,10 @@ export default function FeedView({ currentUser }) {
                 </span>
                 <button
                   onClick={(e) => handleQuickLike(e, art)}
+                  title={art.user_reacted ? 'Unlike' : 'Like'}
                   className="p-2 rounded-full bg-black/60 text-white hover:text-rose-400 hover:bg-black/80 transition-colors backdrop-blur-md"
                 >
-                  <Heart className="w-4 h-4 fill-transparent hover:fill-rose-400" />
+                  <Heart className={`w-4 h-4 transition-colors ${art.user_reacted ? 'fill-rose-400 text-rose-400' : 'fill-transparent text-white hover:fill-rose-400 hover:text-rose-400'}`} />
                 </button>
               </div>
 
@@ -179,8 +190,8 @@ export default function FeedView({ currentUser }) {
                   </div>
 
                   <div className="flex items-center gap-2.5 text-[11px] text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <Heart className="w-3 h-3 text-rose-400" />
+                    <span className={`flex items-center gap-1 font-semibold ${art.user_reacted ? 'text-rose-400' : 'text-gray-300'}`}>
+                      <Heart className={`w-3 h-3 ${art.user_reacted ? 'fill-rose-400 text-rose-400' : 'text-rose-400'}`} />
                       {art.react_count}
                     </span>
                     <span className="flex items-center gap-1">
@@ -196,7 +207,7 @@ export default function FeedView({ currentUser }) {
         )}
       />
 
-      {/* Artwork Detail Modal (Pure showcase - no pricing, with author edit/delete) */}
+      {/* Artwork Detailed Modal */}
       {selectedArtwork && (
         <ArtworkDetailModal
           artwork={selectedArtwork}
@@ -210,11 +221,15 @@ export default function FeedView({ currentUser }) {
             setSelectedArtwork(null);
             setArtworks(prev => prev.filter(a => a.art_id !== artId));
           }}
-          onReactionChange={(artId, reacted) => {
+          onReactionChange={(artId, reacted, newCount) => {
             setArtworks(prev =>
               prev.map(a =>
                 a.art_id === artId
-                  ? { ...a, react_count: reacted ? a.react_count + 1 : Math.max(0, a.react_count - 1) }
+                  ? {
+                      ...a,
+                      react_count: newCount !== undefined ? newCount : (reacted ? a.react_count + 1 : Math.max(0, a.react_count - 1)),
+                      user_reacted: reacted ? 1 : 0
+                    }
                   : a
               )
             );

@@ -37,6 +37,7 @@ export default function ArtworkDetailModal({
   useEffect(() => {
     if (!artwork) return;
     setReactCount(artwork.react_count || 0);
+    setHasReacted(Boolean(artwork.user_reacted));
     setEditTitle(artwork.title || '');
     setEditType(artwork.type || 'Digital');
     setEditDescription(artwork.description || '');
@@ -71,7 +72,10 @@ export default function ArtworkDetailModal({
   };
 
   const handleReact = async () => {
-    if (!currentUser) return;
+    if (!currentUser) {
+      alert('Please log in to react to artwork.');
+      return;
+    }
     try {
       const res = await fetch(`/api/artworks/${artwork.art_id}/react`, {
         method: 'POST',
@@ -80,8 +84,9 @@ export default function ArtworkDetailModal({
       });
       const data = await res.json();
       setHasReacted(data.reacted);
-      setReactCount(prev => data.reacted ? prev + 1 : Math.max(0, prev - 1));
-      if (onReactionChange) onReactionChange(artwork.art_id, data.reacted);
+      const updatedCount = data.react_count !== undefined ? data.react_count : (data.reacted ? reactCount + 1 : Math.max(0, reactCount - 1));
+      setReactCount(updatedCount);
+      if (onReactionChange) onReactionChange(artwork.art_id, data.reacted, updatedCount);
     } catch (err) {
       console.error('Error toggling reaction:', err);
     }

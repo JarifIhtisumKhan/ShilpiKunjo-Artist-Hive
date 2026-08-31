@@ -1,0 +1,375 @@
+================================================================================
+SHILPIKUNJO (ARTIST HIVE) - CSE370 DATABASE SYSTEMS PROJECT
+TEAM FEATURE DISTRIBUTION & SQL SPECIFICATION DOCUMENT
+================================================================================
+
+Course: CSE370 - Database Systems
+Platform: ShilpiKunjo (Artist Hive)
+Database Engines: MariaDB / MySQL / SQLite (12 Core Normalized Tables)
+Team Members: Rubab, Fairuz, Jarif (3 Major Features Each = 9 Total Features)
+
+================================================================================
+TABLE OF CONTENTS & FEATURE SUMMARY MATRIX
+================================================================================
+
+Rank | Feature Name                                       | Assigned To | Key Database & SQL Concepts
+-----+----------------------------------------------------+-------------+-------------------------------------------------------------
+#1   | Contest Submissions & Dynamic Leaderboard Engine   | Fairuz      | JOIN, DENSE_RANK(), NOT EXISTS, Subqueries, UNIQUE Index
+#2   | Artwork Discovery Feed with Aggregated Metrics     | Rubab       | Multi-table LEFT JOIN, GROUP BY, COUNT(), Pattern Match
+#3   | Freelance Commission Lifecycle & State Transitions | Jarif       | Dual Aliased Users JOIN, State Machine UPDATE, CASE Filter
+#4   | Live Contest Voting & Atomic Rank Calculation      | Fairuz      | Atomic Increments (vote_count+1), Subquery Verification
+#5   | Artist Profile & Multi-Valued Expertise Management | Rubab       | Composite Primary Key, GROUP_CONCAT(), Profile Aggregates
+#6   | Sequential Course Curriculum & Enrollment Engine   | Jarif       | Ordered Hierarchy (sequence_order ASC), UNIQUE composite
+#7   | Challenge Lifecycle & Status-Based Filtering       | Fairuz      | Date Arithmetic (deadline < NOW()), HAVING Aggregate Filter
+#8   | Artwork Community Comments & Moderation Threading  | Rubab       | ON DELETE CASCADE, Chronological Indexing, Foreign Key rules
+#9   | Platform Revenue & Performance Analytics Dashboard | Jarif       | Multi-table SUM(), AVG(), Complex Grouping, Subqueries
+
+================================================================================
+MEMBER 1: RUBAB
+MODULE: SOCIAL ENGAGEMENT, ARTWORK CATALOG & ARTIST PORTFOLIO
+================================================================================
+
+Involved Database Tables:
+  1. Users
+  2. Artists
+  3. ArtistExpertise
+  4. Artworks
+  5. ArtworkComments
+  6. ArtworkReactions (Unique Single Reaction per User/Artwork)
+
+--------------------------------------------------------------------------------
+FEATURE 1 (Rank #2): Artwork Discovery Feed with Aggregated Metrics
+--------------------------------------------------------------------------------
+- Description:
+  A comprehensive media feed allowing users to browse, search, and filter artworks 
+  by category (Digital, Hand-drawn, Animation) with real-time comment counts and 
+  artist details.
+- Database Value:
+  Demonstrates multi-table relational retrieval using LEFT JOINs to aggregate 
+  interaction metrics without losing artworks with zero comments.
+- Key SQL Query:
+  SELECT 
+      a.art_id,
+      a.artist_id,
+      a.title,
+      a.type,
+      a.description,
+      a.media_url,
+      a.react_count,
+      a.created_at,
+      u.name AS artist_name,
+      u.username AS artist_username,
+      COUNT(c.comment_id) AS comments_count
+  FROM Artworks a
+  JOIN Users u ON a.artist_id = u.user_id
+  LEFT JOIN ArtworkComments c ON a.art_id = c.art_id
+  WHERE (? IS NULL OR a.type = ?)
+    AND (? IS NULL OR a.title LIKE CONCAT('%', ?, '%') OR u.name LIKE CONCAT('%', ?, '%'))
+  GROUP BY a.art_id, u.user_id
+  ORDER BY a.created_at DESC;
+
+--------------------------------------------------------------------------------
+FEATURE 2 (Rank #5): Artist Profile & Multi-Valued Expertise Management
+--------------------------------------------------------------------------------
+- Description:
+  Manages artist bios, availability status, portfolio links, and multi-valued 
+  skill tags (e.g., Watercolor, Concept Art, 3D Modeling).
+- Database Value:
+  Demonstrates 1NF normalization for multi-valued attributes using a composite 
+  primary key (artist_id, expertise) with GROUP_CONCAT aggregations.
+- Key SQL Queries:
+  -- Query A: Fetch full artist profile summary
+  SELECT 
+      u.user_id,
+      u.name,
+      u.username,
+      u.email,
+      ar.bio,
+      ar.portfolio_links,
+      ar.availability_status,
+      GROUP_CONCAT(DISTINCT ae.expertise ORDER BY ae.expertise SEPARATOR ', ') AS expertise_list,
+      COUNT(DISTINCT a.art_id) AS total_artworks,
+      COUNT(DISTINCT c.task_id) AS total_commissions
+  FROM Users u
+  JOIN Artists ar ON u.user_id = ar.artist_id
+  LEFT JOIN ArtistExpertise ae ON ar.artist_id = ae.artist_id
+  LEFT JOIN Artworks a ON ar.artist_id = a.artist_id
+  LEFT JOIN Commissions c ON ar.artist_id = c.artist_id
+  WHERE u.user_id = ?
+  GROUP BY u.user_id;
+
+  -- Query B: Insert skill tag with composite key
+  INSERT INTO ArtistExpertise (artist_id, expertise) 
+  VALUES (?, ?)
+  ON DUPLICATE KEY UPDATE expertise = VALUES(expertise);
+
+--------------------------------------------------------------------------------
+FEATURE 3 (Rank #8): Artwork Community Comments & Moderation Threading
+--------------------------------------------------------------------------------
+- Description:
+  Allows community users to post feedback and discussions on artworks, with 
+  author/admin moderation capabilities and cascade deletions.
+- Database Value:
+  Maintains referential integrity with ON DELETE CASCADE and tests user-comment 
+  ownership authorization.
+- Key SQL Queries:
+  -- Query A: Fetch chronological discussion list
+  SELECT 
+      ac.comment_id,
+      ac.art_id,
+      ac.comment_text,
+      ac.created_at,
+      u.user_id,
+      u.name AS author_name,
+      u.username AS author_username
+  FROM ArtworkComments ac
+  JOIN Users u ON ac.user_id = u.user_id
+  WHERE ac.art_id = ?
+  ORDER BY ac.created_at ASC;
+
+  -- Query B: Authorized comment deletion (by owner or admin)
+  DELETE FROM ArtworkComments 
+  WHERE comment_id = ? 
+    AND (user_id = ? OR EXISTS (SELECT 1 FROM Admins WHERE admin_id = ?));
+
+
+================================================================================
+MEMBER 2: FAIRUZ
+MODULE: CREATIVE CHALLENGES, LIVE VOTING & LEADERBOARD ENGINE
+================================================================================
+
+Involved Database Tables:
+  1. Challenges
+  2. ChallengeSubmissions
+  3. ChallengeVotes (Unique Single Vote per User/Submission)
+  4. Artworks
+  5. Artists
+  6. Users
+
+--------------------------------------------------------------------------------
+FEATURE 4 (Rank #1 - Highest Complexity): Contest Submissions & Dynamic Leaderboards
+--------------------------------------------------------------------------------
+- Description:
+  Handles official artwork entries for active themed competitions, ensuring an 
+  artwork can only be submitted once per contest, and calculating real-time 
+  ranked leaderboards.
+- Database Value:
+  Demonstrates NOT EXISTS subqueries for eligibility checks, UNIQUE constraint 
+  enforcement (challenge_id, art_id), and dynamic ranking using DENSE_RANK().
+- Key SQL Queries:
+  -- Query A: Filter user's published artworks eligible for submission
+  SELECT a.art_id, a.title, a.type, a.media_url
+  FROM Artworks a
+  WHERE a.artist_id = ?
+    AND NOT EXISTS (
+        SELECT 1 
+        FROM ChallengeSubmissions cs 
+        WHERE cs.challenge_id = ? AND cs.art_id = a.art_id
+    );
+
+  -- Query B: Live Leaderboard with DENSE_RANK()
+  SELECT 
+      cs.submission_id,
+      cs.challenge_id,
+      cs.art_id,
+      cs.vote_count,
+      DENSE_RANK() OVER (PARTITION BY cs.challenge_id ORDER BY cs.vote_count DESC, cs.submitted_at ASC) AS computed_rank,
+      a.title AS artwork_title,
+      a.media_url,
+      a.type AS medium,
+      u.user_id AS artist_id,
+      u.name AS artist_name
+  FROM ChallengeSubmissions cs
+  JOIN Artworks a ON cs.art_id = a.art_id
+  JOIN Users u ON a.artist_id = u.user_id
+  WHERE cs.challenge_id = ?
+  ORDER BY cs.vote_count DESC, cs.submitted_at ASC;
+
+--------------------------------------------------------------------------------
+FEATURE 5 (Rank #4): Challenge Voting & Duplicate Vote Prevention Engine
+--------------------------------------------------------------------------------
+- Description:
+  Enables authenticated community voting on challenge entries, strictly enforcing 
+  a single vote per user rule (composite primary key on ChallengeVotes), preventing 
+  self-voting, and executing atomic increments.
+- Database Value:
+  Shows composite primary key uniqueness, anti-fraud self-vote subquery validations, 
+  and transaction-safe atomic field updates.
+- Key SQL Queries:
+  -- Query A: Record unique vote (fails automatically on duplicate submission_id + user_id)
+  INSERT INTO ChallengeVotes (submission_id, user_id) 
+  VALUES (?, ?);
+
+  -- Query B: Atomic vote registration on active challenge
+  UPDATE ChallengeSubmissions
+  SET vote_count = vote_count + 1
+  WHERE submission_id = ? 
+    AND challenge_id = (SELECT challenge_id FROM Challenges WHERE challenge_id = ChallengeSubmissions.challenge_id AND status = 'Active');
+
+  -- Query C: Synchronize computed ranks into the database
+  UPDATE ChallengeSubmissions cs
+  JOIN (
+      SELECT submission_id, 
+             DENSE_RANK() OVER (ORDER BY vote_count DESC, submitted_at ASC) as new_rank
+      FROM ChallengeSubmissions
+      WHERE challenge_id = ?
+  ) ranked ON cs.submission_id = ranked.submission_id
+  SET cs.rank = ranked.new_rank;
+
+--------------------------------------------------------------------------------
+FEATURE 6 (Rank #7): Admin Challenge Lifecycle, Creation & Termination Engine
+--------------------------------------------------------------------------------
+- Description:
+  Enforces administrative authority (Admins table validation) allowing only system 
+  administrators to create new competitions and terminate active contests to lock 
+  submissions, close community voting, and finalize official winners.
+- Database Value:
+  Demonstrates role-based relational access control, date comparison logic, 
+  administrative state machine transitions, and HAVING aggregates.
+- Key SQL Queries:
+  -- Query A: Admin verification check
+  SELECT admin_id FROM Admins WHERE admin_id = ?;
+
+  -- Query B: Admin contest creation
+  INSERT INTO Challenges (creator_id, title, description, start_date, deadline, banner_url, participation_limit, status)
+  VALUES (?, ?, ?, ?, ?, ?, ?, 'Active');
+
+  -- Query C: Admin contest termination (locks contest and closes entry voting)
+  UPDATE Challenges 
+  SET status = 'Completed' 
+  WHERE challenge_id = ?;
+
+  -- Query D: Catalog retrieval with status filtering and entry aggregates
+  SELECT 
+      ch.challenge_id,
+      ch.title,
+      ch.description,
+      ch.start_date,
+      ch.deadline,
+      ch.banner_url,
+      ch.participation_limit,
+      ch.status,
+      COUNT(cs.submission_id) AS total_entries
+  FROM Challenges ch
+  LEFT JOIN ChallengeSubmissions cs ON ch.challenge_id = cs.challenge_id
+  GROUP BY ch.challenge_id
+  HAVING (? = 'All' OR ch.status = ?)
+  ORDER BY 
+      CASE WHEN ch.status = 'Active' THEN 1 ELSE 2 END,
+      ch.deadline ASC;
+
+
+================================================================================
+MEMBER 3: JARIF
+MODULE: MASTERCLASS E-LEARNING & FREELANCE COMMISSION MARKETPLACE
+================================================================================
+
+Involved Database Tables:
+  1. Courses
+  2. CourseContent
+  3. CourseEnrollments
+  4. Commissions
+  5. Users
+  6. Artists
+
+--------------------------------------------------------------------------------
+FEATURE 7 (Rank #3 - High Complexity): Freelance Commission State Transition Engine
+--------------------------------------------------------------------------------
+- Description:
+  A freelance job board where clients post commission briefs with budgets, and artists 
+  advance tasks through a strict state progression lifecycle (Requested -> 
+  Accepted -> In Progress -> Review -> Completed).
+- Database Value:
+  Demonstrates dual aliased joins to the Users table (client vs artist), 
+  conditional state machine transitions, and deadline checks.
+- Key SQL Queries:
+  -- Query A: Fetch commission briefs with dual user joins
+  SELECT 
+      c.task_id,
+      c.client_id,
+      c_user.name AS client_name,
+      c_user.email AS client_email,
+      c.artist_id,
+      a_user.name AS artist_name,
+      c.requirements,
+      c.description,
+      c.price_offered,
+      c.deadline,
+      c.current_status,
+      c.created_at
+  FROM Commissions c
+  JOIN Users c_user ON c.client_id = c_user.user_id
+  LEFT JOIN Artists ar ON c.artist_id = ar.artist_id
+  LEFT JOIN Users a_user ON ar.artist_id = a_user.user_id
+  WHERE (? = 'All' OR c.current_status = ?)
+  ORDER BY c.created_at DESC;
+
+  -- Query B: State Transition Update with authorization validation
+  UPDATE Commissions
+  SET current_status = ?,
+      artist_id = COALESCE(artist_id, ?)
+  WHERE task_id = ? 
+    AND (client_id = ? OR artist_id = ? OR artist_id IS NULL);
+
+--------------------------------------------------------------------------------
+FEATURE 8 (Rank #6): Sequential Course Curriculum & Enrollment Engine
+--------------------------------------------------------------------------------
+- Description:
+  An artist learning platform providing courses with strictly ordered sequential 
+  lessons (CourseContent) and tracking student enrollment progress.
+- Database Value:
+  Demonstrates 1-to-Many relational ordering (sequence_order ASC) and duplicate-safe 
+  enrollment insertion with composite unique constraints.
+- Key SQL Queries:
+  -- Query A: Retrieve course and structured lesson hierarchy
+  SELECT 
+      c.course_id,
+      c.title AS course_title,
+      c.category,
+      c.difficulty,
+      c.pricing,
+      u.name AS instructor_name,
+      cc.content_id,
+      cc.title AS lesson_title,
+      cc.content_url,
+      cc.sequence_order
+  FROM Courses c
+  JOIN Users u ON c.instructor_id = u.user_id
+  LEFT JOIN CourseContent cc ON c.course_id = cc.course_id
+  WHERE c.course_id = ?
+  ORDER BY cc.sequence_order ASC;
+
+  -- Query B: Student Enrollment Insertion
+  INSERT INTO CourseEnrollments (course_id, user_id, completion_status)
+  VALUES (?, ?, 'In Progress');
+
+--------------------------------------------------------------------------------
+FEATURE 9 (Rank #9): Platform Revenue & Performance Analytics Dashboard
+--------------------------------------------------------------------------------
+- Description:
+  An analytical reporting interface aggregating instructor earnings from course 
+  pricing, freelance contract revenue, and audience engagement statistics.
+- Database Value:
+  Demonstrates advanced multi-table grouping, SUM(pricing), SUM(CASE WHEN...), 
+  COUNT(DISTINCT ...), and COALESCE() null handling.
+- Key SQL Query:
+  SELECT 
+      u.user_id AS artist_id,
+      u.name AS artist_name,
+      COUNT(DISTINCT a.art_id) AS artworks_published,
+      COALESCE(SUM(a.react_count), 0) AS total_artwork_likes,
+      COUNT(DISTINCT ce.enrollment_id) AS total_students_taught,
+      COALESCE(SUM(c.pricing), 0.00) AS potential_course_revenue,
+      COALESCE(SUM(CASE WHEN com.current_status = 'Completed' THEN com.price_offered ELSE 0 END), 0.00) AS commission_earnings
+  FROM Users u
+  JOIN Artists ar ON u.user_id = ar.artist_id
+  LEFT JOIN Artworks a ON ar.artist_id = a.artist_id
+  LEFT JOIN Courses c ON ar.artist_id = c.instructor_id
+  LEFT JOIN CourseEnrollments ce ON c.course_id = ce.course_id
+  LEFT JOIN Commissions com ON ar.artist_id = com.artist_id
+  GROUP BY u.user_id
+  ORDER BY total_students_taught DESC, commission_earnings DESC;
+
+================================================================================
+END OF SPECIFICATION FILE
+================================================================================
