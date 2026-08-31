@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Palette, Sparkles, Briefcase, Trophy, GraduationCap, User, LogOut, ShieldAlert, ArrowRight, CheckCircle2, Database, Layers, X } from 'lucide-react';
+import { Palette, Sparkles, Briefcase, Trophy, GraduationCap, ShoppingBag, User, LogOut, ShieldAlert, ArrowRight, CheckCircle2, Database, Layers, X } from 'lucide-react';
 
 export default function Homepage({ currentUser, onLogout }) {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -13,7 +13,7 @@ export default function Homepage({ currentUser, onLogout }) {
       color: 'from-amber-500 to-orange-500',
       badge: 'Community Showcase',
       description: 'Explore digital art, hand-drawn sketches, and 3D animations from Bangladeshi visual artists. Interact with likes, reactions, and feedback comments.',
-      schemaTables: ['Artworks', 'ArtworkComments'],
+      schemaTables: ['Artworks', 'ArtworkComments', 'ArtworkReactions'],
       features: [
         'Masonry feed sorting by Digital, Hand-drawn, & Animation',
         'Artwork reaction count & comment feedback thread',
@@ -67,6 +67,21 @@ export default function Homepage({ currentUser, onLogout }) {
       ]
     },
     {
+      id: 'marketplace',
+      title: 'Artisan Marketplace',
+      subtitle: 'Module 6: E-Commerce & Product Inventory',
+      icon: ShoppingBag,
+      color: 'from-purple-500 to-pink-600',
+      badge: 'E-Commerce Store',
+      description: 'Buy and sell physical terracotta handcrafts, museum-grade canvas prints, 3D modular assets, and custom Procreate brush packs.',
+      schemaTables: ['MarketplaceProducts', 'Orders', 'OrderItems'],
+      features: [
+        'Product listing & inventory stock management for sellers',
+        'Shopping cart & instant checkout transaction',
+        'SQL Orders and OrderItems generation with automated stock deduction'
+      ]
+    },
+    {
       id: 'profiles',
       title: 'User Profiles & Specializations',
       subtitle: 'Module 1: User Account & Profile Management',
@@ -84,17 +99,17 @@ export default function Homepage({ currentUser, onLogout }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F3E3C5] text-gray-900 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#0B0F19] text-gray-100 flex flex-col justify-between">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 glass-panel border-b border-amber-900/15 bg-[#F3E3C5]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-40 glass-panel border-b border-gray-800/80 bg-[#0B0F19]/90 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             
             {/* Logo */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-amber-300 p-0.5 shadow-lg shadow-amber-500/20">
-                <div className="w-full h-full bg-[#F3E3C5] rounded-[10px] flex items-center justify-center">
-                  <Palette className="w-5 h-5 text-amber-700" />
+                <div className="w-full h-full bg-[#0B0F19] rounded-[10px] flex items-center justify-center">
+                  <Palette className="w-5 h-5 text-amber-400" />
                 </div>
               </div>
               <div>
@@ -158,7 +173,7 @@ export default function Homepage({ currentUser, onLogout }) {
             <Layers className="w-5 h-5 text-amber-400" />
             Platform Options & System Modules
           </h2>
-          <span className="text-xs text-gray-400 font-semibold">MariaDB Schema • 12 Relational Tables</span>
+          <span className="text-xs text-gray-400 font-semibold">MariaDB Schema • 16 Relational Tables</span>
         </div>
 
         {/* Options Cards Grid */}

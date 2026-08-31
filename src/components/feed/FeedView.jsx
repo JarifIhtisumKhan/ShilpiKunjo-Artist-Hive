@@ -3,7 +3,6 @@ import { Search, Heart, MessageSquare, Sparkles, Filter, Plus, Eye } from 'lucid
 import MasonryEngine from '../common/MasonryEngine.jsx';
 import ArtworkDetailModal from './ArtworkDetailModal.jsx';
 import UploadArtworkModal from './UploadArtworkModal.jsx';
-import { handleImageError } from '../../utils/imageUtils.js';
 
 export default function FeedView({ currentUser }) {
   const [artworks, setArtworks] = useState([]);
@@ -61,33 +60,36 @@ export default function FeedView({ currentUser }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       
-      {/* Top Banner & Search Controls */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#c6ae82] p-6 rounded-3xl border border-[#ab946a] shadow-xl">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-black uppercase tracking-wider text-[#315812] flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              Welcome to the Community
+      {/* Top Banner & Search Controls (Reduced Opacity Box) */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-[#0c2428]/40 backdrop-blur-md rounded-3xl p-6 sm:p-7 border border-emerald-400/20 shadow-2xl relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-400/15 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[11px] font-black uppercase tracking-wider text-pink-300 flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-pink-500/15 border border-pink-500/30 font-comic">
+              <Sparkles className="w-3 h-3 text-pink-300" />
+              Artist Community & Sanctuary ✨
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
-            Bangladeshi Artist Hive
+          <h1 className="text-3xl sm:text-4xl font-rustic font-normal tracking-wide text-white flex items-center gap-2 drop-shadow-md">
+            <span>Bangladeshi Artist Hive</span>
+            <span className="text-2xl">🎨</span>
           </h1>
-          <p className="text-xs sm:text-sm text-gray-800 mt-1 max-w-xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-teal-100/80 mt-1.5 max-w-xl leading-relaxed font-comic">
             Welcome to Bangladesh's premier creative collective! Discover captivating digital illustrations, traditional artwork, and expressive visual storytelling crafted with passion by talented artists across the nation.
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto relative z-10">
           {/* Search Input */}
           <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-gray-700 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-emerald-300/60 absolute left-3.5 top-3" />
             <input
               type="text"
               placeholder="Search artworks or artists..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#b8a074] border border-[#9d865c] rounded-2xl pl-10 pr-4 py-2 text-xs text-gray-950 placeholder-gray-700 focus:outline-none focus:border-[#315812] transition-colors"
+              className="w-full bg-[#061613]/90 border border-emerald-500/30 rounded-2xl pl-10 pr-4 py-2 text-xs text-emerald-50 placeholder-emerald-300/40 focus:outline-none focus:border-pink-400 focus:ring-1 focus:ring-pink-400/30 transition-all"
             />
           </div>
 
@@ -95,10 +97,10 @@ export default function FeedView({ currentUser }) {
           {currentUser?.is_artist && (
             <button
               onClick={() => setIsUploadModalOpen(true)}
-              className="btn-stone w-full sm:w-auto px-4 py-2 rounded-2xl text-xs font-bold text-stone-100 shadow-md flex items-center justify-center gap-1.5 transition-all"
+              className="w-full sm:w-auto px-4 py-2 rounded-2xl text-xs font-extrabold bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 hover:opacity-95 shadow-md shadow-pink-500/20 flex items-center justify-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
             >
-              <Plus className="w-4 h-4 text-amber-300" />
-              <span>Publish Art</span>
+              <Plus className="w-4 h-4" />
+              <span>Publish Art 🌸</span>
             </button>
           )}
         </div>
@@ -106,8 +108,8 @@ export default function FeedView({ currentUser }) {
 
       {/* Medium Filter Pills */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-        <div className="flex items-center gap-1.5 text-xs text-gray-800 font-bold pr-2 border-r border-[#ab946a]">
-          <Filter className="w-3.5 h-3.5 text-stone-700" />
+        <div className="flex items-center gap-1.5 text-xs text-emerald-300/80 pr-2 border-r border-emerald-500/30">
+          <Filter className="w-3.5 h-3.5 text-pink-300" />
           <span>Medium:</span>
         </div>
         {filterTabs.map(tab => (
@@ -116,8 +118,8 @@ export default function FeedView({ currentUser }) {
             onClick={() => setActiveFilter(tab)}
             className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeFilter === tab
-                ? 'btn-stone text-stone-100 shadow-md'
-                : 'bg-stone-700/30 text-stone-900 hover:text-stone-950 border border-stone-600/40 hover:bg-stone-700/50'
+                ? 'bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 shadow-md shadow-pink-500/25'
+                : 'bg-[#091f1b]/80 text-emerald-200/80 hover:text-white border border-emerald-500/25 hover:border-pink-300/40 hover:bg-[#0e2c26]'
             }`}
           >
             {tab}
@@ -132,14 +134,17 @@ export default function FeedView({ currentUser }) {
         onItemClick={(art) => setSelectedArtwork(art)}
         emptyMessage="No artworks found in this category."
         renderItem={(art) => (
-          <div className="relative rounded-2xl overflow-hidden bg-gray-900 border border-gray-800/80 group/card shadow-lg hover:border-gray-700 transition-all duration-300">
+          <div className="relative rounded-2xl overflow-hidden glass-card group/card shadow-lg hover:border-pink-400/50 transition-all duration-300">
             {/* Artwork Image with Natural Aspect Ratio */}
             <img
               src={art.media_url}
               alt={art.title}
               loading="lazy"
-              referrerPolicy="no-referrer"
-              onError={(e) => handleImageError(e, art.media_url)}
+              onError={(e) => {
+                if (art.media_url?.includes('16VDnfv6VbfXHMZ-ONnMsdL1EU3oM1F6U')) {
+                  e.target.src = '/artworks/art_9.jpg';
+                }
+              }}
               className="w-full h-auto object-cover transition-transform duration-500 group-hover/card:scale-105"
             />
 

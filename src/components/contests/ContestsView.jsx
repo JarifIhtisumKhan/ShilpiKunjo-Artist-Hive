@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Trophy, Calendar, Users, ArrowLeft, Plus, CheckCircle, Flame, Medal, Sparkles, Heart } from 'lucide-react';
 import MasonryEngine from '../common/MasonryEngine.jsx';
-import { handleImageError } from '../../utils/imageUtils.js';
 
 export default function ContestsView({ currentUser }) {
   const [challenges, setChallenges] = useState([]);
@@ -9,7 +8,6 @@ export default function ContestsView({ currentUser }) {
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [submissionsLoading, setSubmissionsLoading] = useState(false);
-  const [userVotes, setUserVotes] = useState([]);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [userArtworks, setUserArtworks] = useState([]);
   const [selectedArtId, setSelectedArtId] = useState('');
@@ -36,14 +34,9 @@ export default function ContestsView({ currentUser }) {
     setSelectedChallenge(challenge);
     setSubmissionsLoading(true);
     try {
-      let url = `/api/challenges/${challenge.challenge_id}/submissions`;
-      if (currentUser?.user_id) {
-        url += `?userId=${encodeURIComponent(currentUser.user_id)}`;
-      }
-      const res = await fetch(url);
+      const res = await fetch(`/api/challenges/${challenge.challenge_id}/submissions`);
       const data = await res.json();
       setSubmissions(data.submissions || []);
-      setUserVotes(Array.isArray(data.user_votes) ? data.user_votes : []);
     } catch (err) {
       console.error('Error loading submissions:', err);
     } finally {
@@ -53,22 +46,13 @@ export default function ContestsView({ currentUser }) {
 
   const handleVote = async (e, sub) => {
     e.stopPropagation();
-    if (!currentUser) return;
-    if (Number(sub.artist_id) === Number(currentUser.user_id)) return;
-    if (userVotes.includes(sub.submission_id)) return;
-
     try {
-      const res = await fetch(`/api/challenges/submissions/${sub.submission_id}/vote`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: currentUser.user_id })
-      });
+      const res = await fetch(`/api/challenges/submissions/${sub.submission_id}/vote`, { method: 'POST' });
       if (res.ok) {
         setSubmissions(prev =>
           prev.map(s => s.submission_id === sub.submission_id ? { ...s, vote_count: s.vote_count + 1 } : s)
             .sort((a, b) => b.vote_count - a.vote_count)
         );
-        setUserVotes(prev => [...prev, sub.submission_id]);
       }
     } catch (err) {
       console.error('Error voting:', err);
@@ -80,19 +64,8 @@ export default function ContestsView({ currentUser }) {
     try {
       const res = await fetch(`/api/artworks?artist_id=${currentUser.user_id}`);
       const data = await res.json();
-      const allUserArtworks = Array.isArray(data) ? data : [];
-      
-      // Filter out artworks that are already submitted to this challenge
-      const submittedArtIds = new Set(submissions.map(s => Number(s.art_id)));
-      const available = allUserArtworks.filter(a => !submittedArtIds.has(Number(a.art_id)));
-
-      setUserArtworks(available);
-      if (available.length > 0) {
-        setSelectedArtId(String(available[0].art_id));
-      } else {
-        setSelectedArtId('');
-      }
-      setSubmitError('');
+      setUserArtworks(Array.isArray(data) ? data : []);
+      if (data.length > 0) setSelectedArtId(data[0].art_id);
       setIsSubmitModalOpen(true);
     } catch (err) {
       console.error('Error loading user art:', err);
@@ -117,8 +90,7 @@ export default function ContestsView({ currentUser }) {
       if (!res.ok) throw new Error(data.error || 'Failed to submit entry');
 
       setIsSubmitModalOpen(false);
-      await openChallengeDetails(selectedChallenge);
-      fetchChallenges();
+      openChallengeDetails(selectedChallenge);
     } catch (err) {
       setSubmitError(err.message);
     }
@@ -128,55 +100,54 @@ export default function ContestsView({ currentUser }) {
   if (selectedChallenge) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-        
+
         {/* Back Button */}
         <button
           onClick={() => setSelectedChallenge(null)}
-          className="btn-stone flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-md transition-colors"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gray-900 border border-gray-800 text-gray-400 hover:text-white transition-colors text-xs font-semibold"
         >
-          <ArrowLeft className="w-4 h-4 text-amber-300" />
+          <ArrowLeft className="w-4 h-4" />
           <span>Back to All Contests</span>
         </button>
 
-        {/* Contest Header Banner */}
-        <div className="relative rounded-3xl overflow-hidden border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-10 shadow-2xl">
+        {/* Contest Header Banner (Reduced Opacity) */}
+        <div className="relative rounded-3xl overflow-hidden border border-emerald-400/20 bg-[#0c2428]/40 backdrop-blur-md p-6 sm:p-10 shadow-2xl">
           {selectedChallenge.banner_url && (
             <div className="absolute inset-0 z-0 opacity-20 bg-cover bg-center" style={{ backgroundImage: `url(${selectedChallenge.banner_url})` }}></div>
           )}
           <div className="relative z-10 max-w-3xl space-y-4">
             <div className="flex items-center gap-2.5">
-              <span className={`text-[11px] font-extrabold uppercase px-3 py-1 rounded-full ${
-                selectedChallenge.status === 'Active'
-                  ? 'bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30'
-                  : 'bg-[#b8a074] text-gray-800 border border-[#9d865c]'
-              }`}>
+              <span className={`text-[11px] font-extrabold uppercase px-3 py-1 rounded-full ${selectedChallenge.status === 'Active'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                  : 'bg-gray-800 text-gray-400 border border-gray-700'
+                }`}>
                 {selectedChallenge.status} Contest
               </span>
-              <span className="text-xs text-gray-700 flex items-center gap-1">
+              <span className="text-xs text-gray-400 flex items-center gap-1">
                 <Calendar className="w-3.5 h-3.5" />
                 Deadline: {new Date(selectedChallenge.deadline).toLocaleDateString()}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-black text-gray-950 tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
               {selectedChallenge.title}
             </h1>
-            <p className="text-sm text-gray-800 leading-relaxed">
+            <p className="text-sm text-gray-300 leading-relaxed">
               {selectedChallenge.description}
             </p>
 
             <div className="flex items-center gap-4 pt-2">
-              <div className="flex items-center gap-1.5 text-xs text-gray-700">
-                <Users className="w-4 h-4 text-[#315812]" />
+              <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <Users className="w-4 h-4 text-amber-400" />
                 <span>{submissions.length} Submissions entered</span>
               </div>
 
-              {selectedChallenge.status === 'Active' && currentUser && (
+              {selectedChallenge.status === 'Active' && currentUser?.is_artist && (
                 <button
                   onClick={openSubmitModal}
-                  className="btn-stone px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-lg flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 hover:opacity-95 shadow-lg shadow-amber-500/20 flex items-center gap-1.5"
                 >
-                  <Plus className="w-3.5 h-3.5 text-amber-300" />
+                  <Plus className="w-3.5 h-3.5" />
                   <span>Submit Artwork Entry</span>
                 </button>
               )}
@@ -185,13 +156,13 @@ export default function ContestsView({ currentUser }) {
         </div>
 
         {/* Gallery Submissions Header */}
-        <div className="flex items-center justify-between pt-2 border-b border-[#ab946a] pb-3">
+        <div className="flex items-center justify-between pt-2 border-b border-gray-800/80 pb-3">
           <div>
-            <h2 className="text-xl font-bold text-gray-950 flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-[#315812]" />
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-400" />
               Contest Artwork Submissions
             </h2>
-            <p className="text-xs text-gray-700">Masonry gallery with live community voting and dynamic leaderboard</p>
+            <p className="text-xs text-gray-400">Masonry gallery with live community voting and dynamic leaderboard</p>
           </div>
         </div>
 
@@ -203,21 +174,19 @@ export default function ContestsView({ currentUser }) {
           renderItem={(sub, index) => {
             const rank = index + 1;
             return (
-              <div className="relative rounded-2xl overflow-hidden bg-[#b8a074] border border-[#9d865c] group shadow-lg hover:border-[#315812] transition-all duration-300">
+              <div className="relative rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 group shadow-lg hover:border-amber-500/50 transition-all duration-300">
                 {/* Artwork Image */}
                 <img
                   src={sub.media_url}
                   alt={sub.artwork_title}
                   loading="lazy"
-                  referrerPolicy="no-referrer"
-                  onError={(e) => handleImageError(e, sub.media_url)}
                   className="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
                 {/* Rank Badge */}
                 <div className="absolute top-3 left-3 z-10">
                   {rank === 1 && (
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#aca04d] text-white font-black text-xs shadow-lg">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-500 text-gray-950 font-black text-xs shadow-lg">
                       <Medal className="w-3.5 h-3.5" /> #1 Rank
                     </span>
                   )}
@@ -227,45 +196,32 @@ export default function ContestsView({ currentUser }) {
                     </span>
                   )}
                   {rank === 3 && (
-                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-[#315812] text-white font-black text-xs shadow-lg">
+                    <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-amber-800 text-amber-100 font-black text-xs shadow-lg">
                       <Medal className="w-3.5 h-3.5" /> #3 Rank
                     </span>
                   )}
                 </div>
 
                 {/* Overlay Metadata & Vote Button */}
-                <div className="p-3.5 bg-[#c6ae82] flex flex-col gap-2 border-t border-[#9d865c]">
+                <div className="p-3.5 bg-gradient-to-t from-gray-950 via-gray-900/90 to-transparent flex flex-col gap-2">
                   <div>
-                    <h4 className="text-xs font-bold text-gray-950 truncate">{sub.artwork_title}</h4>
-                    <p className="text-[11px] text-gray-800">By {sub.artist_name}</p>
+                    <h4 className="text-xs font-bold text-white truncate">{sub.artwork_title}</h4>
+                    <p className="text-[11px] text-gray-400">By {sub.artist_name}</p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-1 border-t border-[#9d865c]">
-                    <span className="text-xs font-extrabold text-[#315812] flex items-center gap-1">
-                      <Flame className="w-3.5 h-3.5 fill-[#315812]" />
+                  <div className="flex items-center justify-between pt-1 border-t border-gray-800/80">
+                    <span className="text-xs font-extrabold text-amber-400 flex items-center gap-1">
+                      <Flame className="w-3.5 h-3.5 fill-amber-500" />
                       {sub.vote_count} Votes
                     </span>
 
                     {selectedChallenge.status === 'Active' && (
-                      Number(sub.artist_id) === Number(currentUser?.user_id) ? (
-                        <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-stone-700/40 text-stone-900 border border-stone-600/40">
-                          Your Entry
-                        </span>
-                      ) : userVotes.includes(sub.submission_id) ? (
-                        <button
-                          disabled
-                          className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-stone-800 text-stone-300 border border-stone-600 opacity-90 cursor-default"
-                        >
-                          Voted ✓
-                        </button>
-                      ) : (
-                        <button
-                          onClick={(e) => handleVote(e, sub)}
-                          className="btn-stone px-3 py-1 rounded-lg text-[11px] font-bold text-stone-100 shadow-sm"
-                        >
-                          + Vote
-                        </button>
-                      )
+                      <button
+                        onClick={(e) => handleVote(e, sub)}
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/20 text-amber-300 hover:bg-amber-500 hover:text-gray-950 transition-colors border border-amber-500/30"
+                      >
+                        + Vote
+                      </button>
                     )}
                   </div>
                 </div>
@@ -276,38 +232,27 @@ export default function ContestsView({ currentUser }) {
 
         {/* Submit Artwork to Contest Modal */}
         {isSubmitModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md">
-            <div className="w-full max-w-md bg-[#c6ae82] border border-[#ab946a] rounded-3xl p-6 shadow-2xl">
-              <h3 className="text-lg font-bold text-gray-950 mb-2">Submit to Contest</h3>
-              <p className="text-xs text-gray-800 mb-4">Select one of your existing published artworks to submit as your official entry.</p>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+            <div className="w-full max-w-md bg-[#0F1422] border border-gray-800 rounded-3xl p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-white mb-2">Submit to Contest</h3>
+              <p className="text-xs text-gray-400 mb-4">Select one of your existing published artworks to submit as your official entry.</p>
 
               {submitError && (
-                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-700 text-xs font-semibold">
+                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold">
                   {submitError}
                 </div>
               )}
 
               {userArtworks.length === 0 ? (
-                <div className="space-y-3 mb-4">
-                  <p className="text-xs text-[#315812] italic">
-                    No eligible artworks available to submit. Either all your published artworks are already entered in this contest, or you have not published an artwork yet.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setIsSubmitModalOpen(false)}
-                    className="w-full py-2 rounded-xl text-xs bg-[#b8a074] text-gray-900 font-bold hover:bg-[#a89064]"
-                  >
-                    Close
-                  </button>
-                </div>
+                <p className="text-xs text-amber-400 italic mb-4">You have not published any artworks yet. Publish an artwork on the Feed first!</p>
               ) : (
                 <form onSubmit={handleSubmitEntry} className="space-y-4">
                   <div>
-                    <label className="block text-xs font-bold text-gray-900 mb-1.5">Select Artwork</label>
+                    <label className="block text-xs font-bold text-gray-300 mb-1.5">Select Artwork</label>
                     <select
                       value={selectedArtId}
                       onChange={(e) => setSelectedArtId(e.target.value)}
-                      className="w-full bg-[#b8a074] border border-[#9d865c] rounded-xl p-2.5 text-xs text-gray-950 focus:border-[#315812]"
+                      className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500"
                     >
                       {userArtworks.map(art => (
                         <option key={art.art_id} value={art.art_id}>{art.title} ({art.type})</option>
@@ -319,13 +264,13 @@ export default function ContestsView({ currentUser }) {
                     <button
                       type="button"
                       onClick={() => setIsSubmitModalOpen(false)}
-                      className="px-4 py-2 rounded-xl text-xs font-bold bg-stone-700/40 text-stone-900 hover:bg-stone-700/60 border border-stone-600/40"
+                      className="px-4 py-2 rounded-xl text-xs bg-gray-900 text-gray-400 hover:bg-gray-800"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="btn-stone px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-md"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-gray-950 hover:bg-amber-400"
                     >
                       Confirm Submission
                     </button>
@@ -342,20 +287,27 @@ export default function ContestsView({ currentUser }) {
 
   // Contest Listing Grid (Status-Aware)
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-      
-      {/* Header Banner */}
-      <div className="bg-[#c6ae82] p-6 sm:p-8 rounded-3xl border border-[#ab946a] shadow-xl">
-        <div className="flex items-center gap-2 mb-1">
-          <Trophy className="w-4 h-4 text-[#315812]" />
-          <span className="text-xs font-black uppercase tracking-wider text-[#315812]">Creative Arena</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 relative z-10">
+
+      {/* Header Banner (Reduced Opacity) */}
+      <div className="bg-[#0c2428]/40 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-emerald-400/20 shadow-2xl relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-400/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-1.5">
+            <Trophy className="w-4 h-4 text-pink-300" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-pink-300 px-2.5 py-0.5 rounded-full bg-pink-500/15 border border-pink-500/30">
+              Creative Arena 🌸
+            </span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2">
+            <span>Art Challenges & Competitions</span>
+            <span className="text-xl">🎏</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-emerald-100/80 mt-1.5 max-w-xl">
+            Participate in themed creative competitions, submit your artwork entries, and vote on community leaderboard rankings.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
-          Art Challenges & Competitions
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-800 mt-1 max-w-xl">
-          Participate in themed creative competitions, submit your artwork entries, and vote on community leaderboard rankings.
-        </p>
       </div>
 
       {/* Contest Cards Grid */}
@@ -364,22 +316,21 @@ export default function ContestsView({ currentUser }) {
           <div
             key={ch.challenge_id}
             onClick={() => openChallengeDetails(ch)}
-            className="group cursor-pointer rounded-3xl overflow-hidden bg-gray-900/90 border border-gray-800 hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
+            className="group cursor-pointer rounded-3xl overflow-hidden glass-card hover:border-pink-400/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
           >
             <div>
               {/* Banner */}
-              <div className="h-44 w-full relative overflow-hidden bg-black/60">
+              <div className="h-44 w-full relative overflow-hidden bg-black/50">
                 <img
                   src={ch.banner_url}
                   alt={ch.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-3 left-3">
-                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full backdrop-blur-md ${
-                    ch.status === 'Active'
-                      ? 'bg-amber-500 text-gray-950 shadow-md'
-                      : 'bg-gray-900/90 text-gray-400 border border-gray-700'
-                  }`}>
+                  <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full backdrop-blur-md ${ch.status === 'Active'
+                      ? 'bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 shadow-md'
+                      : 'bg-[#091f1b]/90 text-emerald-200 border border-emerald-500/20'
+                    }`}>
                     {ch.status}
                   </span>
                 </div>
@@ -387,23 +338,23 @@ export default function ContestsView({ currentUser }) {
 
               {/* Body */}
               <div className="p-5 space-y-3">
-                <h3 className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors leading-snug">
+                <h3 className="text-lg font-bold text-white group-hover:text-pink-300 transition-colors leading-snug">
                   {ch.title}
                 </h3>
-                <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-emerald-200/70 line-clamp-2 leading-relaxed">
                   {ch.description}
                 </p>
               </div>
             </div>
 
             {/* Footer */}
-            <div className="p-5 pt-0 flex items-center justify-between border-t border-gray-800/60 mt-3 pt-3 text-xs text-gray-400">
+            <div className="p-5 pt-0 flex items-center justify-between border-t border-emerald-500/15 mt-3 pt-3 text-xs text-emerald-300/70">
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                <Calendar className="w-3.5 h-3.5 text-pink-300" />
                 Ends: {new Date(ch.deadline).toLocaleDateString()}
               </span>
-              <span className="font-bold text-gray-300 flex items-center gap-1">
-                <Users className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-bold text-emerald-200 flex items-center gap-1">
+                <Users className="w-3.5 h-3.5 text-amber-300" />
                 {ch.entry_count || 0} Entries
               </span>
             </div>

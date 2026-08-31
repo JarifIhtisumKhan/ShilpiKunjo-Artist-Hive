@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageSquare, Send, User, Calendar, Sparkles, Tag, ShieldCheck, Pencil, Trash2, Check, AlertTriangle, Loader2 } from 'lucide-react';
-import { formatDriveImageUrl, handleImageError } from '../../utils/imageUtils.js';
+import { formatDriveImageUrl } from './UploadArtworkModal';
 
 export default function ArtworkDetailModal({
   artwork,
@@ -172,30 +172,33 @@ export default function ArtworkDetailModal({
   if (!artwork) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-[#c6ae82] border border-[#ab946a] rounded-3xl overflow-hidden shadow-2xl my-auto flex flex-col lg:flex-row max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-lg overflow-y-auto">
+      <div className="relative w-full max-w-5xl glass-panel border border-emerald-400/30 rounded-3xl overflow-hidden shadow-2xl my-auto flex flex-col lg:flex-row max-h-[90vh] backdrop-blur-2xl">
         
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[#b8a074] hover:bg-[#a89064] text-gray-950 transition-colors shadow-lg"
+          className="absolute top-4 right-4 z-20 p-2 rounded-full bg-[#061613]/90 hover:bg-[#0d2a24] text-pink-200 border border-emerald-500/30 transition-all shadow-lg hover:scale-105"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Left: High-Res Artwork Display (Natural Aspect Ratio) */}
-        <div className="lg:w-3/5 bg-black/60 flex items-center justify-center p-4 sm:p-8 min-h-[300px] overflow-hidden">
+        <div className="lg:w-3/5 bg-[#05110e]/80 flex items-center justify-center p-4 sm:p-8 min-h-[300px] overflow-hidden">
           <img
             src={isEditing ? editMediaUrl : artwork.media_url}
             alt={artwork.title}
-            referrerPolicy="no-referrer"
-            onError={(e) => handleImageError(e, isEditing ? editMediaUrl : artwork.media_url)}
-            className="max-h-[75vh] w-auto object-contain rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.01]"
+            onError={(e) => {
+              if (artwork.media_url?.includes('16VDnfv6VbfXHMZ-ONnMsdL1EU3oM1F6U')) {
+                e.target.src = '/artworks/art_9.jpg';
+              }
+            }}
+            className="max-h-[75vh] w-auto object-contain rounded-2xl shadow-2xl transition-transform duration-500 hover:scale-[1.01]"
           />
         </div>
 
         {/* Right: Artwork Metadata & MariaDB Discussion Thread / Edit Mode */}
-        <div className="lg:w-2/5 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-[#ab946a] bg-[#c6ae82] p-6 overflow-y-auto">
+        <div className="lg:w-2/5 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-emerald-500/20 bg-[#081b17]/90 p-6 overflow-y-auto">
           
           {isEditing ? (
             /* --- EDIT POST MODE --- */
@@ -474,9 +477,9 @@ export default function ArtworkDetailModal({
               <button
                 type="submit"
                 disabled={isSubmitting || !newComment.trim()}
-                className="btn-stone px-3.5 py-2 rounded-xl text-stone-100 font-bold text-xs flex items-center justify-center hover:opacity-95 disabled:opacity-50 transition-opacity"
+                className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-gray-950 font-bold text-xs flex items-center justify-center hover:opacity-95 disabled:opacity-50 transition-opacity"
               >
-                <Send className="w-3.5 h-3.5 text-amber-300" />
+                <Send className="w-3.5 h-3.5" />
               </button>
             </form>
 

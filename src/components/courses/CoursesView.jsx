@@ -58,73 +58,73 @@ export default function CoursesView({ currentUser }) {
   // Inside Course: Linear Curriculum View (NOT masonry)
   if (selectedCourse) {
     return (
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-        
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6 relative z-10">
+
         {/* Back Button */}
         <button
           onClick={() => setSelectedCourse(null)}
-          className="btn-stone flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-stone-100 shadow-md transition-colors"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-[#091f1b]/80 border border-emerald-500/30 text-emerald-200 hover:text-white hover:border-pink-400 transition-colors text-xs font-semibold backdrop-blur-md"
         >
-          <ArrowLeft className="w-4 h-4 text-amber-300" />
-          <span>Back to Course Catalog</span>
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to Course Catalog 🌸</span>
         </button>
 
-        {/* Course Header */}
-        <div className="rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-8 space-y-4 shadow-xl">
+        {/* Course Header (Reduced Opacity) */}
+        <div className="rounded-3xl border border-emerald-400/20 bg-[#0c2428]/40 backdrop-blur-md p-6 sm:p-8 space-y-4 shadow-2xl">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30">
+              <span className="text-xs font-bold uppercase px-3 py-1 rounded-full bg-pink-500/15 text-pink-300 border border-pink-500/30">
                 {selectedCourse.category}
               </span>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#b8a074] text-gray-950">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-[#0d2823] text-emerald-200 border border-emerald-500/20">
                 {selectedCourse.difficulty} Level
               </span>
             </div>
-            
+
             <button
               onClick={handleEnroll}
-              className="btn-stone px-5 py-2.5 rounded-xl text-xs font-bold text-stone-100 shadow-md flex items-center gap-1.5"
+              className="px-5 py-2 rounded-xl text-xs font-extrabold bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 hover:opacity-95 shadow-md shadow-pink-500/20 flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-all"
             >
-              <CheckCircle2 className="w-4 h-4 text-amber-300" />
-              <span>Enroll In Masterclass</span>
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Enroll In Masterclass 🌸</span>
             </button>
           </div>
 
           {enrollMsg && (
-            <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-bold flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4" />
+            <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-pink-300" />
               {enrollMsg}
             </div>
           )}
 
-          <h1 className="text-2xl sm:text-3xl font-black text-gray-950">
+          <h1 className="text-2xl sm:text-3xl font-black text-white">
             {selectedCourse.title}
           </h1>
 
           <div className="flex items-center gap-3 pt-2">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#aca04d] to-[#315812] flex items-center justify-center font-bold text-xs text-white">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-pink-400 to-amber-400 flex items-center justify-center font-bold text-xs text-gray-950 shadow">
               {selectedCourse.instructor_name?.charAt(0) || 'I'}
             </div>
             <div>
-              <p className="text-xs text-gray-700">Instructor</p>
-              <h4 className="text-sm font-bold text-gray-950">{selectedCourse.instructor_name}</h4>
+              <p className="text-xs text-emerald-300/70">Instructor</p>
+              <h4 className="text-sm font-bold text-emerald-100">{selectedCourse.instructor_name}</h4>
             </div>
           </div>
         </div>
 
         {/* Linear Curriculum & Lesson List (Strictly Linear) */}
-        <div className="rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-8 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between pb-3 border-b border-[#ab946a]">
-            <h3 className="text-lg font-bold text-gray-950 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-[#315812]" />
+        <div className="rounded-3xl border border-emerald-400/25 glass-panel p-6 sm:p-8 space-y-4 shadow-2xl backdrop-blur-2xl">
+          <div className="flex items-center justify-between pb-3 border-b border-emerald-500/20">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-pink-300" />
               Sequential Curriculum ({selectedCourse.lessons?.length || 0} Lessons)
             </h3>
-            <span className="text-xs text-gray-700">Step-by-Step Learning</span>
+            <span className="text-xs text-emerald-300/70">Step-by-Step Learning</span>
           </div>
 
           <div className="space-y-3 pt-2">
             {(!selectedCourse.lessons || selectedCourse.lessons.length === 0) ? (
-              <p className="text-xs text-gray-700 italic">No lesson content uploaded yet.</p>
+              <p className="text-xs text-emerald-300/50 italic">No lesson content uploaded yet.</p>
             ) : (
               selectedCourse.lessons.map((lesson, idx) => (
                 <a
@@ -132,24 +132,24 @@ export default function CoursesView({ currentUser }) {
                   href={lesson.content_url || "https://www.youtube.com/watch?v=dQw4w9WgXcQ&list=RDdQw4w9WgXcQ&start_radio=1"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 rounded-2xl bg-[#b8a074] border border-[#9d865c] hover:border-[#315812] hover:bg-[#ad966a] transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-4 rounded-2xl bg-[#091f1b]/70 border border-emerald-500/20 hover:border-pink-400/50 hover:bg-[#0e2d27] transition-all group cursor-pointer"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl bg-[#a89064] group-hover:bg-[#315812] group-hover:text-white flex items-center justify-center text-xs font-bold text-gray-950 transition-colors">
+                    <div className="w-8 h-8 rounded-xl bg-[#0d2a24] group-hover:bg-pink-500/20 group-hover:text-pink-300 flex items-center justify-center text-xs font-bold text-emerald-200 transition-colors">
                       {lesson.sequence_order}
                     </div>
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-950 transition-colors">
+                      <h4 className="text-sm font-semibold text-emerald-100 group-hover:text-white transition-colors">
                         {lesson.title}
                       </h4>
-                      <p className="text-[11px] text-gray-700 flex items-center gap-1 mt-0.5">
-                        <Clock className="w-3 h-3 text-gray-700" /> ~25 mins video lesson
+                      <p className="text-[11px] text-emerald-300/60 flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3 h-3 text-pink-300" /> ~25 mins video lesson
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-white bg-gradient-to-r from-[#aca04d] to-[#315812] px-3 py-1.5 rounded-xl border border-[#315812]/30 flex items-center gap-1.5 shadow-sm">
+                    <span className="text-xs font-bold text-pink-300 bg-pink-500/15 px-3 py-1.5 rounded-xl border border-pink-500/30 group-hover:bg-gradient-to-r group-hover:from-pink-400 group-hover:to-amber-300 group-hover:text-gray-950 transition-all flex items-center gap-1.5 shadow-sm">
                       <PlayCircle className="w-4 h-4" /> Start Lesson
                     </span>
                   </div>
@@ -165,37 +165,43 @@ export default function CoursesView({ currentUser }) {
 
   // Course Catalog Grid
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-      
-      {/* Header Banner */}
-      <div className="bg-[#c6ae82] p-6 sm:p-8 rounded-3xl border border-[#ab946a] shadow-xl">
-        <div className="flex items-center gap-2 mb-1">
-          <GraduationCap className="w-4 h-4 text-[#315812]" />
-          <span className="text-xs font-black uppercase tracking-wider text-[#315812]">Masterclass Hub</span>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 relative z-10">
+
+      {/* Header Banner (Reduced Opacity) */}
+      <div className="bg-[#0c2428]/40 backdrop-blur-md p-6 sm:p-8 rounded-3xl border border-emerald-400/20 shadow-2xl relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-pink-400/15 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2 mb-1.5">
+            <GraduationCap className="w-4 h-4 text-pink-300" />
+            <span className="text-[11px] font-black uppercase tracking-wider text-pink-300 px-2.5 py-0.5 rounded-full bg-pink-500/15 border border-pink-500/30">
+              Masterclass Hub 🌸
+            </span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-rustic font-normal tracking-wide text-white flex items-center gap-2 drop-shadow-md">
+            <span>Art Courses & Masterclasses</span>
+            <span className="text-2xl">🎨</span>
+          </h1>
+          <p className="text-xs sm:text-sm text-emerald-100/80 mt-1.5 max-w-xl">
+            Learn traditional Bengali painting, digital concept art, and 3D modeling with sequential curriculum taught by masters.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-gray-950 tracking-tight">
-          Art Courses & Masterclasses
-        </h1>
-        <p className="text-xs sm:text-sm text-gray-800 mt-1 max-w-xl">
-          Learn traditional Bengali painting, digital concept art, and 3D modeling with sequential curriculum taught by masters.
-        </p>
       </div>
 
       {/* Difficulty Filters */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2">
-        <div className="flex items-center gap-1.5 text-xs text-gray-400 pr-2 border-r border-gray-800">
-          <Filter className="w-3.5 h-3.5 text-amber-400" />
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex items-center gap-1.5 text-xs text-emerald-300/80 pr-2 border-r border-emerald-500/30">
+          <Filter className="w-3.5 h-3.5 text-pink-300" />
           <span>Difficulty:</span>
         </div>
         {['All', 'Beginner', 'Intermediate', 'Advanced'].map(diff => (
           <button
             key={diff}
             onClick={() => setActiveDifficulty(diff)}
-            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${
-              activeDifficulty === diff
-                ? 'btn-stone text-stone-100 shadow-md'
-                : 'bg-stone-700/30 text-stone-900 hover:text-stone-950 border border-stone-600/40 hover:bg-stone-700/50'
-            }`}
+            className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${activeDifficulty === diff
+                ? 'bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 shadow-md shadow-pink-500/25'
+                : 'bg-[#091f1b]/80 text-emerald-200/80 hover:text-white border border-emerald-500/25 hover:border-pink-300/40 hover:bg-[#0e2c26]'
+              }`}
           >
             {diff}
           </button>
@@ -208,37 +214,37 @@ export default function CoursesView({ currentUser }) {
           <div
             key={c.course_id}
             onClick={() => openCourse(c.course_id)}
-            className="group cursor-pointer rounded-3xl overflow-hidden bg-gray-900/90 border border-gray-800 hover:border-amber-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
+            className="group cursor-pointer rounded-3xl overflow-hidden glass-card hover:border-pink-400/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
           >
             <div className="p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                <span className="text-[11px] font-bold uppercase px-2.5 py-0.5 rounded-md bg-pink-500/15 text-pink-300 border border-pink-500/30">
                   {c.category}
                 </span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-[#0d2823] text-emerald-200 border border-emerald-500/20">
                   {c.difficulty}
                 </span>
               </div>
 
-              <h3 className="text-lg font-bold text-white group-hover:text-amber-400 transition-colors leading-snug">
+              <h3 className="text-lg font-bold text-white group-hover:text-pink-300 transition-colors leading-snug">
                 {c.title}
               </h3>
 
               <div className="flex items-center gap-2.5 pt-1">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center font-bold text-[10px] text-gray-950">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-pink-400 to-amber-400 flex items-center justify-center font-bold text-[10px] text-gray-950 shadow">
                   {c.instructor_name?.charAt(0) || 'I'}
                 </div>
-                <span className="text-xs font-medium text-gray-300">{c.instructor_name}</span>
+                <span className="text-xs font-medium text-emerald-200">{c.instructor_name}</span>
               </div>
             </div>
 
-            <div className="p-6 pt-0 border-t border-gray-800/60 mt-2 pt-3 flex items-center justify-between text-xs text-gray-400">
+            <div className="p-6 pt-0 border-t border-emerald-500/15 mt-2 pt-3 flex items-center justify-between text-xs text-emerald-300/70">
               <span className="flex items-center gap-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                <BookOpen className="w-3.5 h-3.5 text-pink-300" />
                 {c.lesson_count || 0} Lessons
               </span>
-              <span className="flex items-center gap-1.5 font-bold text-gray-300">
-                <Users className="w-3.5 h-3.5 text-amber-400" />
+              <span className="flex items-center gap-1.5 font-bold text-emerald-200">
+                <Users className="w-3.5 h-3.5 text-amber-300" />
                 {c.student_count || 0} Students
               </span>
             </div>

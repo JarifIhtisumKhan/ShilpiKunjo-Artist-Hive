@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, ShieldCheck, Sparkles, Briefcase, Trophy, Image, CheckCircle, Save, Plus, X, Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
 import ArtworkDetailModal from '../feed/ArtworkDetailModal';
-import { handleImageError } from '../../utils/imageUtils.js';
 
 export default function DashboardView({ currentUser, onProfileUpdated }) {
   const [profileData, setProfileData] = useState(null);
@@ -93,40 +92,42 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
 
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-gray-400">
-        <div className="w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
-        Loading artist profile details from MariaDB...
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-emerald-300 relative z-10">
+        <div className="w-8 h-8 border-2 border-pink-400 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+        Loading artist sanctuary profile details... 🌸
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8">
-      
-      {/* Top Profile Header */}
-      <div className="rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 relative z-10">
+
+      {/* Top Profile Header (Reduced Opacity) */}
+      <div className="rounded-3xl border border-emerald-400/20 bg-[#0c2428]/40 backdrop-blur-md p-6 sm:p-8 shadow-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-5">
-          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#aca04d] via-[#748729] to-[#315812] p-1 shadow-lg shadow-[#315812]/20">
-            <div className="w-full h-full bg-[#b8a074] rounded-[14px] flex items-center justify-center font-black text-2xl text-[#315812]">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-pink-400 via-orange-300 to-amber-300 p-1 shadow-lg shadow-pink-500/20">
+            <div className="w-full h-full bg-[#0a1e1b] rounded-[14px] flex items-center justify-center font-black text-2xl text-pink-300">
               {profileData?.name?.charAt(0) || 'A'}
             </div>
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-black text-gray-950">{profileData?.name}</h1>
-              <ShieldCheck className="w-5 h-5 text-[#315812]" />
+              <h1 className="text-2xl font-black text-white flex items-center gap-2">
+                <span>{profileData?.name}</span>
+                <span>🌸</span>
+              </h1>
+              <ShieldCheck className="w-5 h-5 text-pink-300" />
             </div>
-            <p className="text-xs text-gray-800">@{profileData?.username} • {profileData?.email}</p>
+            <p className="text-xs text-emerald-200/70">@{profileData?.username} • {profileData?.email}</p>
             <div className="flex items-center gap-2 pt-1">
-              <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${
-                availability === 'Available'
-                  ? 'bg-emerald-500/20 text-emerald-800 border border-emerald-500/30'
-                  : 'bg-rose-500/20 text-rose-800 border border-rose-500/30'
-              }`}>
+              <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ${availability === 'Available'
+                  ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-400/30'
+                  : 'bg-rose-500/20 text-rose-200 border border-rose-400/30'
+                }`}>
                 Commissions: {availability}
               </span>
-              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30">
-                Verified Artist Profile
+              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-pink-500/15 text-pink-300 border border-pink-500/30">
+                Verified Artist Sanctuary
               </span>
             </div>
           </div>
@@ -134,89 +135,89 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
 
         {/* Quick Stats Summary */}
         <div className="grid grid-cols-3 gap-3 w-full md:w-auto">
-          <div className="p-3.5 rounded-2xl bg-[#b8a074] border border-[#9d865c] text-center min-w-[95px]">
-            <span className="block text-xl font-black text-gray-950">{profileData?.artworks?.length || 0}</span>
-            <span className="text-[10px] uppercase font-bold text-gray-800">Artworks</span>
+          <div className="p-3.5 rounded-2xl bg-[#091f1b]/80 border border-emerald-500/25 text-center min-w-[95px]">
+            <span className="block text-xl font-black text-white">{profileData?.artworks?.length || 0}</span>
+            <span className="text-[10px] uppercase font-bold text-emerald-300/70">Artworks</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-[#b8a074] border border-[#9d865c] text-center min-w-[95px]">
-            <span className="block text-xl font-black text-gray-950">{profileData?.commissions?.length || 0}</span>
-            <span className="text-[10px] uppercase font-bold text-gray-800">Contracts</span>
+          <div className="p-3.5 rounded-2xl bg-[#091f1b]/80 border border-emerald-500/25 text-center min-w-[95px]">
+            <span className="block text-xl font-black text-white">{profileData?.commissions?.length || 0}</span>
+            <span className="text-[10px] uppercase font-bold text-emerald-300/70">Contracts</span>
           </div>
-          <div className="p-3.5 rounded-2xl bg-[#b8a074] border border-[#9d865c] text-center min-w-[95px]">
-            <span className="block text-xl font-black text-gray-950">{profileData?.submissions?.length || 0}</span>
-            <span className="text-[10px] uppercase font-bold text-gray-800">Contests</span>
+          <div className="p-3.5 rounded-2xl bg-[#091f1b]/80 border border-emerald-500/25 text-center min-w-[95px]">
+            <span className="block text-xl font-black text-white">{profileData?.submissions?.length || 0}</span>
+            <span className="text-[10px] uppercase font-bold text-emerald-300/70">Contests</span>
           </div>
         </div>
       </div>
 
       {saveMsg && (
-        <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 text-xs font-bold flex items-center gap-2 animate-fadeIn">
-          <CheckCircle className="w-4 h-4" />
+        <div className="p-3.5 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-200 text-xs font-bold flex items-center gap-2 animate-fadeIn">
+          <CheckCircle className="w-4 h-4 text-pink-300" />
           {saveMsg}
         </div>
       )}
 
       {/* Main Grid: Profile Settings & Activity Summaries */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Left Column: Consistent Artist Settings */}
-        <div className="lg:col-span-1 rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 space-y-5 shadow-xl">
-          <div className="flex items-center gap-2 pb-2 border-b border-[#ab946a]">
-            <User className="w-4 h-4 text-[#315812]" />
-            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-950">Artist Profile Settings</h3>
+        <div className="lg:col-span-1 rounded-3xl border border-emerald-400/25 glass-panel p-6 space-y-5 shadow-xl backdrop-blur-2xl">
+          <div className="flex items-center gap-2 pb-2 border-b border-emerald-500/20">
+            <User className="w-4 h-4 text-pink-300" />
+            <h3 className="text-sm font-bold uppercase tracking-wider text-white">Artist Profile Settings</h3>
           </div>
 
           <form onSubmit={handleSaveProfile} className="space-y-4">
             <div>
-              <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">Display Name</label>
+              <label className="block text-[11px] font-bold text-emerald-200/80 uppercase mb-1">Display Name</label>
               <input
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500 transition-colors"
+                className="w-full bg-[#061613] border border-emerald-500/30 rounded-xl p-2.5 text-xs text-white focus:border-pink-400 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">Phone Number</label>
+              <label className="block text-[11px] font-bold text-emerald-200/80 uppercase mb-1">Phone Number</label>
               <input
                 type="text"
                 placeholder="+8801..."
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500 transition-colors"
+                className="w-full bg-[#061613] border border-emerald-500/30 rounded-xl p-2.5 text-xs text-white focus:border-pink-400 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">Location / Address</label>
+              <label className="block text-[11px] font-bold text-emerald-200/80 uppercase mb-1">Location / Address</label>
               <input
                 type="text"
                 placeholder="e.g. Dhaka, Bangladesh"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500 transition-colors"
+                className="w-full bg-[#061613] border border-emerald-500/30 rounded-xl p-2.5 text-xs text-white focus:border-pink-400 transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">Artist Bio & Statement</label>
+              <label className="block text-[11px] font-bold text-emerald-200/80 uppercase mb-1">Artist Bio & Statement</label>
               <textarea
                 rows={3}
                 placeholder="Describe your art style, tools, and inspirations..."
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500 resize-none transition-colors"
+                className="w-full bg-[#061613] border border-emerald-500/30 rounded-xl p-2.5 text-xs text-white focus:border-pink-400 resize-none transition-colors"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">Commission Availability</label>
+              <label className="block text-[11px] font-bold text-emerald-200/80 uppercase mb-1">Commission Availability</label>
               <select
                 value={availability}
                 onChange={(e) => setAvailability(e.target.value)}
-                className="w-full bg-gray-950 border border-gray-800 rounded-xl p-2.5 text-xs text-white focus:border-amber-500 transition-colors"
+                className="w-full bg-[#061613] border border-emerald-500/30 rounded-xl p-2.5 text-xs text-white focus:border-pink-400 transition-colors"
               >
                 <option value="Available">Available for Freelance Contracts</option>
                 <option value="Busy">Currently Busy / Closed</option>
@@ -224,12 +225,12 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-gray-300 uppercase mb-1">Expertise Tags (ArtistExpertise)</label>
+              <label className="block text-[11px] font-bold text-emerald-200/80 uppercase mb-1">Expertise Tags</label>
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {expertise.map(tag => (
-                  <span key={tag} className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-300 border border-amber-500/30">
+                  <span key={tag} className="flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg bg-pink-500/15 text-pink-300 border border-pink-500/30">
                     {tag}
-                    <button type="button" onClick={() => handleRemoveExpertise(tag)} className="hover:text-red-400">
+                    <button type="button" onClick={() => handleRemoveExpertise(tag)} className="hover:text-rose-400">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -241,12 +242,12 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
                   placeholder="Add skill tag (e.g. Ink, 3D)..."
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  className="flex-1 bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-amber-500"
+                  className="flex-1 bg-[#061613] border border-emerald-500/30 rounded-xl px-2.5 py-1.5 text-xs text-white focus:border-pink-400"
                 />
                 <button
                   type="button"
                   onClick={handleAddExpertise}
-                  className="btn-stone-secondary px-3.5 py-1.5 rounded-xl text-xs font-bold text-stone-100 transition-colors"
+                  className="px-3 py-1.5 rounded-xl bg-[#0d2a24] hover:bg-emerald-800 text-xs font-bold text-emerald-200 border border-emerald-500/30 transition-colors"
                 >
                   Add
                 </button>
@@ -255,19 +256,19 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
 
             <button
               type="submit"
-              className="btn-stone w-full py-2.5 rounded-xl text-stone-100 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 font-extrabold text-xs flex items-center justify-center gap-2 hover:opacity-95 shadow-md shadow-pink-500/20 hover:scale-105 active:scale-95 transition-all"
             >
-              <Save className="w-4 h-4 text-amber-300" />
-              <span>Save Profile Changes</span>
+              <Save className="w-4 h-4" />
+              <span>Save Artist Profile 🌸</span>
             </button>
           </form>
         </div>
 
         {/* Right Column: Personal Activity Summaries */}
-        <div className="lg:col-span-2 rounded-3xl border border-[#ab946a] bg-[#c6ae82] p-6 space-y-6 shadow-xl">
-          
+        <div className="lg:col-span-2 rounded-3xl border border-emerald-400/25 glass-panel p-6 space-y-6 shadow-xl backdrop-blur-2xl">
+
           {/* Subtab Buttons */}
-          <div className="flex items-center gap-2 border-b border-[#ab946a] pb-3">
+          <div className="flex items-center gap-2 border-b border-emerald-500/20 pb-3">
             {[
               { id: 'artworks', label: 'My Published Artworks', icon: Image, count: profileData?.artworks?.length },
               { id: 'commissions', label: 'My Commission Tasks', icon: Briefcase, count: profileData?.commissions?.length },
@@ -279,15 +280,14 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id)}
-                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                    isActive
-                      ? 'bg-gradient-to-r from-[#aca04d] to-[#315812] text-white shadow-md shadow-[#315812]/20'
-                      : 'text-gray-800 hover:text-gray-950 bg-[#b8a074] border border-[#9d865c]'
-                  }`}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${isActive
+                      ? 'bg-gradient-to-r from-pink-400 via-orange-300 to-amber-300 text-gray-950 shadow-md shadow-pink-500/25'
+                      : 'text-emerald-200/80 hover:text-white bg-[#091f1b]/80 border border-emerald-500/25'
+                    }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span>{tab.label}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-black/20 text-white' : 'bg-[#a89064] text-gray-950'}`}>
+                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-black/20 text-black' : 'bg-[#061613] text-emerald-300'}`}>
                     {tab.count || 0}
                   </span>
                 </button>
@@ -316,13 +316,7 @@ export default function DashboardView({ currentUser, onProfileUpdated }) {
                       onClick={() => setSelectedArtwork(art)}
                       className="rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 shadow-md group cursor-pointer hover:border-amber-500/50 transition-all"
                     >
-                      <img
-                        src={art.media_url}
-                        alt={art.title}
-                        referrerPolicy="no-referrer"
-                        onError={(e) => handleImageError(e, art.media_url)}
-                        className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
+                      <img src={art.media_url} alt={art.title} className="h-32 w-full object-cover group-hover:scale-105 transition-transform duration-300" />
                       <div className="p-3">
                         <h4 className="text-xs font-bold text-white truncate group-hover:text-amber-400 transition-colors">{art.title}</h4>
                         <div className="flex items-center justify-between mt-1 text-[10px] text-gray-400">

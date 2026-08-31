@@ -1,78 +1,150 @@
 @import "tailwindcss";
 
+/* ----------------------------------------------------
+   1. TYPOGRAPHY: 100% Comic Sans Everywhere
+   ---------------------------------------------------- */
+
+* {
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', 'Chalkboard SE', cursive, sans-serif !important;
+}
+
 @layer base {
-  *, *::before, *::after {
-    font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif !important;
+  html, body, *, h1, h2, h3, h4, h5, h6, p, span, button, input, select, textarea, label, a, li, table, code, div {
+    font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', 'Chalkboard SE', cursive, sans-serif !important;
   }
 
   body {
-    font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif !important;
-    background-color: #F3E3C5;
-    color: #111827;
+    color: #e8f7f5;
+    overflow-x: hidden;
+    font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', 'Chalkboard SE', cursive, sans-serif !important;
   }
 
-  h1, h2, h3, h4, h5, h6, input, textarea, select, button, p, span, a, label {
-    font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', cursive, sans-serif !important;
+  h1, h2, h3, h4, h5, h6, .font-rustic, .heading-rustic, .brand-title {
+    font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', 'Chalkboard SE', cursive, sans-serif !important;
   }
 }
 
-/* Stone Button Palette & Contrast Styles */
-.btn-stone,
-button.btn-stone,
-.btn-stone-primary {
-  background: linear-gradient(180deg, #44403c 0%, #292524 100%) !important;
-  color: #f5f5f4 !important;
-  border: 1px solid #78716c !important;
-  box-shadow: 0 4px 8px -1px rgba(28, 25, 23, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+.font-rustic, .font-comic, .heading-rustic, .brand-title {
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Comic Neue', 'Chalkboard SE', cursive, sans-serif !important;
 }
 
-.btn-stone:hover,
-button.btn-stone:hover,
-.btn-stone-primary:hover {
-  background: linear-gradient(180deg, #57534e 0%, #383430 100%) !important;
-  border-color: #a8a29e !important;
-  box-shadow: 0 6px 14px -2px rgba(28, 25, 23, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.25) !important;
-  transform: translateY(-1px);
+/* ----------------------------------------------------
+   2. TRANSLUCENT CANVAS BACKGROUND ATMOSPHERE
+   ---------------------------------------------------- */
+
+.dream-bg-container {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-image: url('/music-dream-background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-.btn-stone:active,
-button.btn-stone:active,
-.btn-stone-primary:active {
-  background: linear-gradient(180deg, #1c1917 0%, #292524 100%) !important;
-  transform: translateY(0);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5) !important;
-}
-
-.btn-stone-secondary {
-  background: linear-gradient(180deg, #78716c 0%, #57534e 100%) !important;
-  color: #fafaf9 !important;
-  border: 1px solid #a8a29e !important;
-  box-shadow: 0 2px 5px rgba(28, 25, 23, 0.3) !important;
-  transition: all 0.2s ease !important;
-}
-
-.btn-stone-secondary:hover {
-  background: linear-gradient(180deg, #8c857f 0%, #68635d 100%) !important;
-  border-color: #d6d3d1 !important;
-  transform: translateY(-1px);
-}
-
-/* Glassmorphism panel styles */
+/* Cute Translucent Dream Overlay */
 .glass-panel {
-  background: rgba(17, 24, 39, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(12, 34, 39, 0.78);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(135, 235, 220, 0.22);
+  box-shadow: 0 12px 40px -10px rgba(3, 20, 24, 0.6), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+}
+
+.glass-panel-cute {
+  background: rgba(16, 42, 48, 0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 182, 217, 0.3);
+  box-shadow: 0 20px 50px -12px rgba(6, 26, 30, 0.7), 0 0 25px -5px rgba(255, 182, 217, 0.15);
 }
 
 .glass-card {
-  background: rgba(31, 41, 55, 0.5);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(14, 40, 46, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(135, 235, 220, 0.18);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.15);
+  background: rgba(18, 52, 60, 0.82);
+  border-color: rgba(255, 182, 217, 0.55);
+  box-shadow: 0 14px 35px -8px rgba(0, 0, 0, 0.45), 0 0 22px -3px rgba(255, 182, 217, 0.25);
+  transform: translateY(-3px);
 }
+
+.glass-nav {
+  background: rgba(8, 28, 33, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(135, 235, 220, 0.2);
+}
+
+/* Cute Floating Animations */
+@keyframes cute-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+}
+
+@keyframes cute-pulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes gentle-drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(16px, -14px) rotate(5deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+}
+
+.animate-cute-float {
+  animation: cute-float 4.5s ease-in-out infinite;
+}
+
+.animate-cute-pulse {
+  animation: cute-pulse 3s ease-in-out infinite;
+}
+
+.animate-drift-slow {
+  animation: gentle-drift 8s ease-in-out infinite;
+}
+
+/* Custom Cute Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(8, 28, 33, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(135, 235, 220, 0.35);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 182, 217, 0.6);
+}
+
+
