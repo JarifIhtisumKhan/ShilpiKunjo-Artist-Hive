@@ -5,8 +5,8 @@ export default function Navbar({ activeTab, onTabChange, currentUser, onLogout, 
   const navTabs = [
     { id: 'feed', label: 'Feed', icon: Sparkles, badge: 'Showcase' },
     { id: 'courses', label: 'Courses', icon: GraduationCap },
-    { id: 'freelance', label: 'Freelance 🔨', icon: Briefcase, isUnderConstruction: true },
-    { id: 'contests', label: 'Contests 🔨', icon: Trophy, isUnderConstruction: true },
+    { id: 'freelance', label: 'Freelance', icon: Briefcase },
+    { id: 'contests', label: 'Contests', icon: Trophy },
     { id: 'dashboard', label: 'Dashboard', icon: User }
   ];
 
@@ -49,9 +49,6 @@ export default function Navbar({ activeTab, onTabChange, currentUser, onLogout, 
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-gray-600'}`} />
                   <span className="hidden md:inline">{tab.label}</span>
-                  {tab.isUnderConstruction && (
-                    <span className="md:hidden text-[10px]" title="Under Construction">🔨</span>
-                  )}
                   {tab.badge && !isActive && (
                     <span className="hidden lg:inline-block text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-[#aca04d]/20 text-[#315812] border border-[#315812]/30">
                       {tab.badge}
