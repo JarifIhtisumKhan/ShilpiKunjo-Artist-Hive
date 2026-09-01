@@ -596,6 +596,7 @@ app.get('/api/commissions', async (req, res) => {
   try {
     const { status, search, userId, user_id } = req.query;
     const activeUserId = userId || user_id;
+    const isAdmin = await verifyAdmin(activeUserId);
 
     let sql = `
       SELECT c.*, u.name as client_name, u.username as client_username,
@@ -608,21 +609,32 @@ app.get('/api/commissions', async (req, res) => {
     `;
     const params = [];
 
-    // Privacy rule: anyone other than the client and commissioner cannot view/access non-Requested tasks
-    if (activeUserId) {
-      sql += ` AND (c.current_status = 'Requested' OR c.client_id = ? OR c.artist_id = ?)`;
-      params.push(activeUserId, activeUserId);
-    } else {
-      sql += ` AND c.current_status = 'Requested'`;
+    // Visibility rules:
+    // 1. Admins see all tasks
+    // 2. Logged-in users see all Open/Requested briefs + all briefs where they are Client or Assigned Artist
+    // 3. Guests see all Open/Requested briefs
+    if (!isAdmin) {
+      if (activeUserId) {
+        sql += ` AND (c.current_status = 'Requested' OR c.client_id = ? OR c.artist_id = ?)`;
+        params.push(activeUserId, activeUserId);
+      } else {
+        sql += ` AND c.current_status = 'Requested'`;
+      }
     }
 
     if (status && status !== 'All') {
-      sql += ` AND c.current_status = ?`;
-      params.push(status);
+      if (status === 'My Tasks' && activeUserId) {
+        sql += ` AND (c.client_id = ? OR c.artist_id = ?)`;
+        params.push(activeUserId, activeUserId);
+      } else {
+        sql += ` AND c.current_status = ?`;
+        params.push(status);
+      }
     }
+
     if (search) {
-      sql += ` AND (c.requirements LIKE ? OR c.description LIKE ? OR u.name LIKE ?)`;
-      params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      sql += ` AND (c.requirements LIKE ? OR c.description LIKE ? OR u.name LIKE ? OR ua.name LIKE ?)`;
+      params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     sql += ` ORDER BY c.created_at DESC`;
@@ -659,33 +671,82 @@ app.post('/api/commissions', async (req, res) => {
 app.patch('/api/commissions/:id/status', async (req, res) => {
   try {
     const taskId = req.params.id;
-    const { current_status, artist_id, userId, user_id } = req.body;
-    const requestingUserId = userId || user_id || artist_id;
+    const { current_status, artist_id, userId, user_id, deliverable_url } = req.body;
+    const requestingUserId = userId || user_id;
 
     const existing = await queryOne(`SELECT * FROM Commissions WHERE task_id = ?`, [taskId]);
     if (!existing) {
       return res.status(404).json({ error: 'Commission task not found' });
     }
 
-    // If task is non-Requested (already accepted/in progress/review/completed), only client or assigned artist can update
-    if (existing.current_status !== 'Requested') {
-      if (requestingUserId && Number(existing.client_id) !== Number(requestingUserId) && Number(existing.artist_id) !== Number(requestingUserId)) {
-        return res.status(403).json({ error: 'Unauthorized: Only the client or commissioner can update this task' });
+    const isAdmin = await verifyAdmin(requestingUserId);
+    const isClient = requestingUserId && Number(existing.client_id) === Number(requestingUserId);
+    const isAssignedArtist = requestingUserId && Number(existing.artist_id) === Number(requestingUserId);
+
+    // If accepting an open requested brief
+    if (existing.current_status === 'Requested' && current_status === 'Accepted') {
+      const applyingArtistId = artist_id || requestingUserId;
+      if (!applyingArtistId) {
+        return res.status(400).json({ error: 'Artist ID required to accept commission' });
       }
+      if (Number(existing.client_id) === Number(applyingArtistId)) {
+        return res.status(400).json({ error: 'Clients cannot accept their own commission briefs.' });
+      }
+
+      // Ensure artist record exists
+      const artist = await queryOne(`SELECT artist_id FROM Artists WHERE artist_id = ?`, [applyingArtistId]);
+      if (!artist) {
+        await run(`INSERT INTO Artists (artist_id, bio, portfolio_links, availability_status) VALUES (?, 'Visual Creator', '', 'Available')`, [applyingArtistId]);
+      }
+
+      await run(`UPDATE Commissions SET current_status = 'Accepted', artist_id = ? WHERE task_id = ?`, [applyingArtistId, taskId]);
+      return res.json({ success: true, message: 'Commission contract accepted successfully!' });
+    }
+
+    // Authorization check for ongoing tasks
+    if (!isAdmin && !isClient && !isAssignedArtist) {
+      return res.status(403).json({ error: 'Unauthorized: Only the client, assigned artist, or an admin can update this task.' });
     }
 
     let sql = `UPDATE Commissions SET current_status = ?`;
     const params = [current_status];
 
-    if (artist_id) {
+    if (artist_id !== undefined && artist_id !== null) {
       sql += `, artist_id = ?`;
       params.push(artist_id);
+    }
+    if (deliverable_url) {
+      sql += `, media_url = ?`;
+      params.push(formatDriveImageUrl(deliverable_url));
     }
     sql += ` WHERE task_id = ?`;
     params.push(taskId);
 
     await run(sql, params);
-    res.json({ success: true, message: 'Status updated successfully' });
+    res.json({ success: true, current_status, message: `Commission status updated to ${current_status}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete Commission Task (Client or Admin only)
+app.delete('/api/commissions/:id', async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const userId = req.query.user_id || req.body?.user_id;
+
+    const existing = await queryOne(`SELECT * FROM Commissions WHERE task_id = ?`, [taskId]);
+    if (!existing) return res.status(404).json({ error: 'Commission task not found' });
+
+    const isAdmin = await verifyAdmin(userId);
+    const isClient = userId && Number(existing.client_id) === Number(userId);
+
+    if (!isAdmin && !isClient) {
+      return res.status(403).json({ error: 'Permission denied: Only the author client or an admin can delete this task.' });
+    }
+
+    await run(`DELETE FROM Commissions WHERE task_id = ?`, [taskId]);
+    res.json({ success: true, message: 'Commission task deleted successfully.' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

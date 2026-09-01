@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS ArtworkComments (
 CREATE TABLE IF NOT EXISTS ArtworkReactions (
     art_id INT NOT NULL,
     user_id INT NOT NULL,
+    reaction_type VARCHAR(20) DEFAULT 'like',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (art_id, user_id),
     FOREIGN KEY (art_id) REFERENCES Artworks(art_id) ON DELETE CASCADE,
